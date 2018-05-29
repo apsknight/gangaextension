@@ -1,0 +1,126 @@
+.pm {
+    box-shadow: 0 0 2px 0px rgba(0, 0, 0, 0.4);
+    background-color: #FEFFFF;
+    margin: 5px 0px;
+}
+
+/* Title bar */
+.pm .title {
+    background-color: #ADD8E6;
+    overflow: hidden;
+    height: 30px;
+}
+
+.pm .titleleft {
+    display: inline-block;
+    height: 100%;
+}
+
+.pm .titleright {
+    float: right;
+    position: relative;
+    height: 100%;
+}
+
+.pm .tbitem {
+    padding: 0px 15px;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+    display: table-cell;
+}
+
+.pm .titlecollapse:hover {
+    background-color: #ADD8E6;
+}
+
+.pm .tabbuttons {
+    margin: 0px 0px;
+    font-size: 0;
+}
+
+.pm .tabbuttonicon {
+    display: inline-block;
+    position: relative;
+    top: -2px;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+
+.headericon {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAXUlEQVR4AWMAgVGwjkGKNA3/GT4wZDAwkqABDA8zaBKtAQp/MjQwsBGnAQGvMVgTpwEB/zFMZ+AjoAEDPmUIpKGGfwzTGPho5OmfDPUMbKREnAYpSSOdgZGSxDcKADdXTK1stp++AAAAAElFTkSuQmCC);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+    width: 15px;
+    display: inline-block;
+    top: -2px;
+    height: 24px;
+    vertical-align: middle;
+    transition: transform 0.4s;
+    transform: rotate(90deg);
+}
+
+.headericoncollapsed {
+    transform: rotate(0deg);
+}
+
+.pm .stopbuttonicon {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAr0lEQVR4Ab2TxxWDQBBDv2M3bmI7cJquoAsoiJNzAXvdAjBRzjl8XeaNJDL8nSFGyopQaFVMVmzuMGVLfqZtsb1Kl5j8hmK6XFDE7yi6vJj8gaant7pr1hkOr5DHkeleBghTxAGjpuKLCZw8Q6RaFqGmokleglhpqQqKS0tE0FIVxSXCB4UnL+nlm/7gsQ7ZPvPiXvs0Jh9+fNAluhPvfvoDiQFGwpJQaFlMVmz+zB4uewsoywq4xgAAAABJRU5ErkJggg==);
+}
+
+.pm .closebuttonicon {
+    background-size: 20px;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAa0lEQVR4AeWSsREDIQwEtwlRhO3vP0JFPLgeHJDdnEfBh2y8F2hHnM5FJ1AayRtLshiE6F8WHUsw9kT0m8BDMFlMotZ10rzuaHtS63qo6s8HWkaLFXpo5ErXyKWukS25dRM5sXz+Pt+Ls/kBnolC6l7shJkAAAAASUVORK5CYII=);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.pm .cancelbutton:hover {
+    background-color: #ADD8E6;
+}
+
+/* Content */
+.pm .content {
+    float: clear;
+}
+
+/* Job Table */
+.pm th {
+    font-size: small;
+    background-color: #EEEEEE;
+    border: 0px;
+}
+
+
+
+.pm td {
+    background-color: white;
+    border: 0;
+    font-size: small;
+    border-top: 1px solid rgba(84, 84, 84, 0.08);
+}
+  
+.pm table {
+    border-radius: 0px;
+    width: 100%;
+    border: 1px solid #CFCFCF;
+    /* height: 10px; */
+}
+  
+.pm tbody {
+    height: 100px;
+    overflow: auto;
+}
+  
+.pm tr {
+    border: 0px;
+}
+  
+.pm td, .pm th {
+    text-align: center;
+    vertical-align: middle;
+    height: 25px;
+    line-height: 25px;
+}
