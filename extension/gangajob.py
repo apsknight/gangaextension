@@ -20,6 +20,10 @@ class GangaMonitor:
     
     def __handle_incoming_msg(self, msg):
         print("Message recieved from frontend: \n %s \n" % str(msg))
+        data = msg["content"]["data"]
+        if data["msgtype"] == "cancel":
+            ganga.jobs[int(data.id)].kill()
+
 
     def register_comm(self):
         self.ipython.kernel.comm_manager.register_target("GangaMonitor", self.comm_target)
@@ -65,18 +69,23 @@ class GangaMonitor:
                 "backend": str(job_obj.backend.__class__.__name__),
                 "subjobs": len(job_obj.subjobs),
                 "status": "submitted",
-                "job_submission_time": str(job_obj.time.submitting())
+                "job_submission_time": str(job_obj.time.submitting())[:19],
             }
             self.send(job_info)
+            endpoints = ["completed", "killed", "failed"]
             while True:
+                ganga.runMonitoring()
                 job_status = {
                     "msgtype": "jobstatus",
                     "id": job_obj.id,
                     "status": str(job_obj.status),
-                    "duration": str(job_obj.time.runtime())
+                    "duration": str(job_obj.time.submitting())[:19]
                 }
+                if job_info["subjobs"] > 0:
+                    job_status.update({"subjob_status": {}})
+                    for sj in job_obj.subjobs:
+                        job_status["subjob_status"][str(sj.id)] = str(sj.status)
+                time.sleep(1)
                 self.send(job_status)
-                if (job_status["status"] == "completed"):
+                if (job_status["status"] in endpoints):
                     break
-                time.sleep(10)
-
