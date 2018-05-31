@@ -3,8 +3,6 @@
  * @module GangaMonitor
  */
 
-// import Jupyter from 'base/js/namespace';  // Module for Jupyter frontend APIs
-// import events from 'base/js/events';	  // Module for Jupyter Notebook events
 define([
     'base/js/namespace', 'require', 'base/js/events', './cellqueue', './displaymonitor'
 ], function(
@@ -15,7 +13,7 @@ define([
      */
     function GangaMonitor() {
 
-        // Communication object with kernl.
+        // Communication object with kernel.
         this.comm = null;
         this.cell = null;
         this.startComm();
@@ -57,6 +55,13 @@ define([
     }
 
     /**
+     * @param {object} msg
+     */
+    GangaMonitor.prototype.send = function (msg) {
+        this.comm.send(msg);
+    }
+
+    /**
      * Called when communication with kernel is closed.
      * @param {object} msg - JSON close message object.
      */
@@ -92,14 +97,14 @@ define([
             console.error('GangaMonitor: Job Started with no running cell');
             return;
         }
-        // console.log('Cell:', cell);
         console.log('GangaMonitor: Job started at cell', cell.cell_id, data);
-        var dismonitor = new displaymonitor.DisplayMonitor(cell, data);
-        // displaymonitor.initializeDisplay();
+        var dismonitor = new displaymonitor.DisplayMonitor(this, cell, data);
+        this.displaymonitor = dismonitor;
     }
 
     GangaMonitor.prototype.job_status_recieved = function (data) {
         console.log(data);
+        this.displaymonitor.updateContent(data);
     }
 
     return {

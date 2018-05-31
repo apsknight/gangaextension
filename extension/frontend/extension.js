@@ -3,16 +3,14 @@
  * @module extension
  */
 
-// import GangaMonitor from './gangamonitor.js'
-
-/**
- * Entrypoint function : Jupyter automatically detects and call this function.
- */
 define([
-    './gangamonitor', './cellqueue'
+	'./gangamonitor', './cellqueue'
 ], function(
-    GangaMonitor, CurrentCell
+	GangaMonitor, CurrentCell
 ) {
+	/**
+	 * Entrypoint function : Jupyter automatically detects and call this function.
+	 */
 	function load_ipython_extension() {
 		console.log('GangaMonitor: Loading GangaMonitor frontend extension');
 		var monitor = new GangaMonitor.GangaMonitor();
