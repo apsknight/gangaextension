@@ -10,8 +10,8 @@ define([
 ) {
 
     /**
-     * 
-     * @param {*} name 
+     * Function to asynchronously load static file.
+     * @param {string} name 
      */
     function load_css(name) {
         var link = document.createElement("link");
@@ -21,10 +21,18 @@ define([
         document.getElementsByTagName("head")[0].appendChild(link);
     };
 
+    /**
+     * Converts '2018-06-03 12:00:00' to 'Today at 12:00' 
+     * @param {string} date 
+     */
     function format_date(date) {
         return moment().subtract(date, 'YYYY-MM-DD hh:mm:ss').calendar();
     }
 
+    /**
+     * Converts '3:33:33' to '3 hours 33 minutes 33 seconds 
+     * @param {string} time 
+     */
     function format_time(time) {
         var timeArray = time.toString().split(':');
         var timeString = '';
@@ -39,6 +47,12 @@ define([
         return timeString;
     }
 
+    /**
+     * Main singleton object for displaying frontend widget.
+     * @param {GangaMonitor} monitor 
+     * @param {codecell} cell 
+     * @param {Object} data 
+     */
     function DisplayMonitor(monitor, cell, data) {
         this.monitor = monitor;
         this.cell = cell;
@@ -51,6 +65,9 @@ define([
         this.createContent();
     };
 
+    /**
+     * Initialize display features
+     */
     DisplayMonitor.prototype.initializeDisplay = function() {
         load_css('./style.css');
         var that = this;
@@ -97,6 +114,12 @@ define([
         });
     };
 
+    /**
+     * Function to add data to a tag.
+     * @param {string} identifier - .Classname or #idname  
+     * @param {object} data - data to write
+     * @param {string} type - HTML or TEXT
+     */
     DisplayMonitor.prototype.add_data_to_tag = function (identifier, data, type) {
         var tag = this.displayElement.find(identifier)
         if (type == 'html') {
@@ -107,6 +130,9 @@ define([
         }
     };
 
+    /**
+     * Popularize frontend widget with Job Info.
+     */
     DisplayMonitor.prototype.createContent = function () {
         var that = this;
         var data = this.jobInfoData;
@@ -164,6 +190,9 @@ define([
         }
     };
 
+    /**
+     * Function to create subjob row skeleton.
+     */
     DisplayMonitor.prototype.new_subjob_row = function () {
         var srow = $('<tr></tr>').addClass('stagerow');
         var tdstageid = $('<td></td>').addClass('tdstageid');
@@ -176,6 +205,10 @@ define([
         return srow;
     };
 
+    /**
+     * Function to update frontend widget with current job status.
+     * @param {object} data - Job Status JSON data
+     */
     DisplayMonitor.prototype.updateContent = function (data) {
         // Update Job Status Badge
         var status = $('<span></span>').addClass(data.status.toUpperCase()).text(data.status.toUpperCase()).addClass('tditemjobstatus');
@@ -214,6 +247,10 @@ define([
         }
     };
 
+    /**
+     * Function for sending Job Cancellation request to kernel extension.
+     * @param {object} data - Job Info data
+     */
     DisplayMonitor.prototype.cancelJobRequest = function (data) {
         cancelMsg = {'id': data.id,
                     'msgtype': 'cancel'};
