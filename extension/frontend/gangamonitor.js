@@ -76,7 +76,7 @@ define([
         }
         switch(data.msgtype) {
             case "magic_execution_start":
-                console.log("Magic Execution Start");
+                console.log("GangaMonitor: Magic Execution Start");
                 this.cell = currentcell.getRunningCell();
                 console.log('This cell', this.cell);
                 break;

@@ -9,6 +9,10 @@ define([
     Jupyter, requirejs, events, $, WidgetHTML, moment
 ) {
 
+    /**
+     * 
+     * @param {*} name 
+     */
     function load_css(name) {
         var link = document.createElement("link");
         link.type = "text/css";
@@ -17,34 +21,58 @@ define([
         document.getElementsByTagName("head")[0].appendChild(link);
     };
 
+    function format_date(date) {
+        return moment().subtract(date, 'YYYY-MM-DD hh:mm:ss').calendar();
+    }
+
+    function format_time(time) {
+        var timeArray = time.toString().split(':');
+        var timeString = '';
+        if (timeArray[0] > 0) {
+            timeString = timeString + timeArray[0] + ' hours';
+        }
+        if (timeArray[1] > 0) {
+            timeString = timeString + timeArray[1] + ' minutes';
+        }
+        timeString = timeString + timeArray[2] + ' seconds';
+
+        return timeString;
+    }
+
     function DisplayMonitor(monitor, cell, data) {
         this.monitor = monitor;
         this.cell = cell;
-        this.initialDisplayCreated = false;
+        // this.initialDisplayCreated = false;
         this.displayElement = null;
-        this.jobData = data;
-        this.displayVisible = false;
-        this.initialData = data;
+        this.jobInfoData = data;
+        this.subjobsCount = data.subjobs;
         this.contentVisible = true;
         this.initializeDisplay();
-        this.createContent(data);
+        this.createContent();
     };
 
     DisplayMonitor.prototype.initializeDisplay = function() {
         load_css('./style.css');
         var that = this;
+
+        // Append Widget to innercell
         var element = $(WidgetHTML).hide();
         this.displayElement = element;
         this.cell.element.find('.inner_cell').append(element);
         element.slideToggle();
-        this.displayVisible = true;
+
+        // Add callback to Stop Button
         element.find('.stopbutton').click(function () {
             console.log('GangaMoniotor: Stop request initiated from displaymonitor');
-            that.cancelJobRequest(that.initialData);
+            that.cancelJobRequest(that.jobInfoData);
         });
+
+        // Add callback to close button
         element.find('.closebutton').click(function () {
             that.displayElement.remove();
         });
+
+        // Toggle Content on Collapse button
         element.find('.titlecollapse').click(function () {
             if (that.contentVisible) {
                 that.contentVisible = false;
@@ -69,17 +97,33 @@ define([
         });
     };
 
-    DisplayMonitor.prototype.createContent = function (data) {
+    DisplayMonitor.prototype.add_data_to_tag = function (identifier, data, type) {
+        var tag = this.displayElement.find(identifier)
+        if (type == 'html') {
+            tag.html(data);
+        }
+        else if (type == 'text') {
+            tag.text(data);
+        }
+    };
+
+    DisplayMonitor.prototype.createContent = function () {
         var that = this;
-        this.subjobsCount = data.subjobs;
-        var relative_time = this.getRelativeTime(data.job_submission_time);
-        this.displayElement.find('.backendbadge').text(data.backend.toUpperCase());
-        this.displayElement.find('.tdjobid').text(data.id);
-        this.displayElement.find('.tdjobname').text(data.name);
+        var data = this.jobInfoData;
         var status = $('<span></span>').addClass(data.status.toUpperCase()).text(data.status.toUpperCase()).addClass('tditemjobstatus');
-        this.displayElement.find('.tdjobstatus').html(status);
-        this.displayElement.find('.tdjobstart').text(relative_time);
-        this.displayElement.find('.tdjobtime').text(data.duration);
+
+        // Add Job Info to widget
+        this.add_data_to_tag('.backendbadge', data.backend.toUpperCase(), 'text');
+        this.add_data_to_tag('.applicationbadge', data.application.toUpperCase(), 'text');
+        this.add_data_to_tag('.splitterbadge', data.splitter, 'text');
+        this.add_data_to_tag('.subjobcount', data.subjobs, 'text');
+        this.add_data_to_tag('.tdjobid', data.id, 'text');
+        this.add_data_to_tag('.tdjobname', data.name, 'text');
+        this.add_data_to_tag('.tdjobstatus', status, 'html');
+        this.add_data_to_tag('.tdjobstart', format_date(data.job_submission_time), 'text');
+        this.add_data_to_tag('.tdjobtime', '-', 'text');
+
+        // Subjob Progress Bar
         if (this.subjobsCount == 0) {
             this.displayElement.find('.tdjobtasks').text('No Subjobs');
         }
@@ -87,43 +131,64 @@ define([
             var progress = $('\<div class="cssprogress">\
                                <div class="data"></div><span class="val1"></span><span class="val2"></span></div>').addClass('tdstageitemprogress');
             this.displayElement.find('.tdjobtasks').addClass('tdstageprocess').append(progress);
-        }
-        // if (data["subjobs"] > 0) {
-        //     this.displayElement.find('.tdbutton').append('<span class="tbitem tdcollapse"><span class="tdicon"></span></span>');
-        //     this.subjobContentVisible = true;
+            this.displayElement.find('.tdstageitemprogress .val2').width('100%');
+            
+            var fakerow = $('<tr><td class="stagetableoffset"></td><td colspan=7 class="stagedata"></td></tr>').addClass('jobstagedatarow').hide();
+            var stagetable = $("<table class='stagetable'>\
+            <thead>\
+            <th class='thstageid'>Subjob ID</th>\
+            <th class='thstagestatus'>Status</th>\
+            <th class='thstagestart'>Submission Time</th>\
+            <th class='thstageduration'>Runtime</th>\
+            </thead>\
+            <tbody></tbody></table>").addClass('stagetable');
+            fakerow.find('.stagedata').append(stagetable);
+            this.displayElement.find('.tdbutton').addClass('tdstagebutton').html('<span class="tdstageicon"></span>');
+            var icon = this.displayElement.find('.tdstageicon');
+            this.displayElement.find('.tdbutton').click(function () {
+                icon.toggleClass('tdstageiconcollapsed');
+                fakerow.slideToggle();
+            })
 
-        //     that = this;                                                             
-        //     this.displayElement.find('.tdcollapse').click(function () {
-        //         if (that.subjobContentVisible) {
-        //             that.subjobContentVisible = false;
-        //             that.cell.element.find('.tdcontent').slideUp({
-        //                 queue: false,
-        //                 duration: 400,
-        //                 complete: function () {
-        //                     that.cell.element.find('.tdicon').toggleClass('tdcollapsed');
-        //                 }
-        //             });
-        //         }
-        //         else {
-        //             that.subjobContentVisible = true;
-        //             that.cell.element.find('.tdcontent').slideDown({
-        //                 queue: false,
-        //                 duration: 400,
-        //                 complete: function () {
-        //                     that.cell.element.find('.tdicon').toggleClass('tdiconcollapsed');
-        //                 }
-        //             });
-        //         }
-        //     });   
-        // }
+            this.displayElement.find('.jobbody').append(fakerow);
+
+            for (var i = 0; i < this.subjobsCount; i++) {
+                var subjobrow = this.new_subjob_row();
+                subjobrow.find('.tdstageid').text(this.jobInfoData.id + '.' + i);        
+                subjobrow.find('.tdstagestatus').removeClass('tdstagestatus').addClass('tdstagestatus'+i);
+                subjobrow.find('.tdstagestarttime').text(format_date(data.subjob_submission_time[i]));
+                subjobrow.find('.tdstageduration').removeClass('tdstageduration').addClass('tdstageduration'+i).text('-');
+                subjobrow.addClass('stagerow' + i);
+                this.displayElement.find('.stagetable tbody').append(subjobrow);
+            }
+        }
+    };
+
+    DisplayMonitor.prototype.new_subjob_row = function () {
+        var srow = $('<tr></tr>').addClass('stagerow');
+        var tdstageid = $('<td></td>').addClass('tdstageid');
+        var status = $('<span></span>').addClass("NEW").text('NEW');
+        var tdstatus = $('<td></td>').addClass("tdstagestatus").html(status);
+        var tdstarttime = $('<td></td>').addClass('tdstagestarttime');
+        var tdduration = $('<td></td>').addClass('tdstageduration');
+        srow.append(tdstageid, tdstatus, tdstarttime, tdduration);
+        
+        return srow;
     };
 
     DisplayMonitor.prototype.updateContent = function (data) {
+        // Update Job Status Badge
         var status = $('<span></span>').addClass(data.status.toUpperCase()).text(data.status.toUpperCase()).addClass('tditemjobstatus');
-        this.displayElement.find('.tdjobstatus').html(status);
-        if (data.status == 'completed') {
+        this.add_data_to_tag('.tdjobstatus', status, 'html');
+
+        // Hide stop button if Job is finished
+        var endpoints = ["completed", "killed", "failed"];
+        if (endpoints.includes(data.status)) {
             this.displayElement.find('.stopbutton').hide();
+            this.displayElement.find('.tdjobtime').text(format_time(data.runtime));
         }
+
+        // Update Subjob Progress Bar and Subjob status badge
         if (this.subjobsCount > 0) {
             var val1 = 0, val2 = 0;
             var completedTask = 0, runningTask = 0;
@@ -134,6 +199,11 @@ define([
                 else {
                     runningTask++;
                 }
+                if (endpoints.includes(data.subjob_status[i])) {
+                    this.displayElement.find('.tdstageduration' + i).text(format_time(data.subjob_runtime[i]));
+                }
+                var subJobStatus = $('<span></span>').addClass(data.subjob_status[i].toUpperCase()).text(data.subjob_status[i].toUpperCase()).addClass('tditemjobstatus');
+                this.displayElement.find('.tdstagestatus'+i).html(subJobStatus);
             }
             val1 = (completedTask / this.subjobsCount) * 100;
             val2 = (runningTask / this.subjobsCount) * 100;
@@ -142,15 +212,6 @@ define([
             this.displayElement.find('.tdstageitemprogress .val1').width(val1 + '%');
             this.displayElement.find('.tdstageitemprogress .val2').width(val2 + '%');
         }
-    };
-
-    DisplayMonitor.prototype.getRelativeTime = function (time) {
-        var job_time_utc = moment.utc().format(time);
-        var parse_utc_time = moment.utc(job_time_utc).toDate();
-        var job_time_local = moment(parse_utc_time).local().format('YYYY-MM-DD HH:mm:ss');
-        // var job_time_relative = moment(job_time_local, ["YYYY-MM-DD h:mm:ss"]).fromNow();
-
-        return job_time_local;
     };
 
     DisplayMonitor.prototype.cancelJobRequest = function (data) {
