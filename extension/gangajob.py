@@ -70,6 +70,7 @@ class GangaMonitor:
                 "subjobs": len(job_obj.subjobs),
                 "status": "submitted",
                 "job_submission_time": str(job_obj.time.submitting())[:19],
+                "application": str(job_obj.application).split()[0]
             }
             self.send(job_info)
             endpoints = ["completed", "killed", "failed"]
