@@ -2,6 +2,7 @@ from __future__ import print_function
 import re
 from IPython.utils.io import capture_output
 import time
+from threading import Thread
 
 # Import Ganga
 ganga_imported = False
@@ -27,18 +28,21 @@ class GangaMonitor:
         data = msg["content"]["data"]
         if data["msgtype"] == "cancel":
             ganga.jobs[int(data["id"])].kill()
-            job_obj = self.job_obj
-            job_status = {
-                "msgtype": "jobstatus",
-                "id": job_obj.id,
-                "status": str(job_obj.status),
-            }
-            if len(job_obj.subjobs) > 0:
-                job_status.update({"subjob_status": {}})
-                for sj in job_obj.subjobs:
-                    job_status["subjob_status"][str(sj.id)] = str(sj.status)
+            # job_obj = self.job_obj
+            # job_status = {
+            #     "msgtype": "jobstatus",
+            #     "id": job_obj.id,
+            #     "status": str(job_obj.status),
+            # }
+            # if len(job_obj.subjobs) > 0:
+            #     job_status.update({"subjob_status": {}})
+            #     job_status.update({"subjob_runtime": {}})
+            #     for sj in job_obj.subjobs:
+            #         job_status["subjob_status"][str(sj.id)] = str(sj.status)
+            #         if (str(sj.status) is "completed"):
+            #             job_status["subjob_runtime"][str(sj.id)] = str(sj.time.runtime())
 
-            self.send(job_status)
+            # self.send(job_status)
 
     def register_comm(self):
         self.ipython.kernel.comm_manager.register_target("GangaMonitor", self.comm_target)
@@ -94,14 +98,14 @@ class GangaMonitor:
                 "id": job_obj.id,
                 "status": str(job_obj.status),
             }
-            if (job_status["status"] in endpoints):
+            if (job_status["status"] is "completed"):
                 job_status.update({"runtime": str(job_obj.time.runtime())})
             if len(job_obj.subjobs) > 0:
                 job_status.update({"subjob_status": {}})
                 job_status.update({"subjob_runtime": {}})
                 for sj in job_obj.subjobs:
                     job_status["subjob_status"][str(sj.id)] = str(sj.status)
-                    if (str(sj.status) in endpoints):
+                    if (str(sj.status) is "completed"):
                         job_status["subjob_runtime"][str(sj.id)] = str(sj.time.runtime())
             time.sleep(1)
             self.send(job_status)
@@ -123,5 +127,6 @@ class GangaMonitor:
             exec(mirror_code)
             self.job_obj = job_obj
             self.send_job_info()
-            self.send_job_status()
-            
+            # Start new thread for sending status
+            status_thread = Thread(target=self.send_job_status, args=())
+            status_thread.start()

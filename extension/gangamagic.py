@@ -1,7 +1,6 @@
 from __future__ import print_function
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
 from gangajob import GangaMonitor
-from threading import Thread
 
 @magics_class
 class Ganga(Magics):
@@ -17,9 +16,8 @@ class Ganga(Magics):
         else:
             code = cell
         
-        # Create new thread to avoid kernel interruption while Job is running.
-        ganga_thread = Thread(target=monitor.run, args=(code,))
-        ganga_thread.start()
+        # Start execution
+        monitor.run(code)
 
 # Default ipython entrypoint for kernel extension.
 def load_ipython_extension(ipython):
