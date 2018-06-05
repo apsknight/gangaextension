@@ -218,7 +218,9 @@ define([
         var endpoints = ["completed", "killed", "failed"];
         if (endpoints.includes(data.status)) {
             this.displayElement.find('.stopbutton').hide();
-            this.displayElement.find('.tdjobtime').text(format_time(data.runtime));
+            if (data.status == "completed") {
+                this.displayElement.find('.tdjobtime').text(format_time(data.runtime));
+            }
         }
 
         // Update Subjob Progress Bar and Subjob status badge
@@ -232,7 +234,7 @@ define([
                 else {
                     runningTask++;
                 }
-                if (endpoints.includes(data.subjob_status[i])) {
+                if (data.subjob_status[i] == "completed") {
                     this.displayElement.find('.tdstageduration' + i).text(format_time(data.subjob_runtime[i]));
                 }
                 var subJobStatus = $('<span></span>').addClass(data.subjob_status[i].toUpperCase()).text(data.subjob_status[i].toUpperCase()).addClass('tditemjobstatus');
