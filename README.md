@@ -6,7 +6,7 @@
 
 ***
 
-![submitjob](https://preview.ibb.co/dyXtyT/submit_job.gif)
+![submitjob](https://image.ibb.co/j1B8Xo/submit_job.gif)
 
 ## Installation
 This project is under development. For a quick test, run following commands.
