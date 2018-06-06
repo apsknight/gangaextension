@@ -1,22 +1,19 @@
-# Ganga Jupyter Interface
+# Ganga Jupyter Extension
 > A Jupyter Extension for submitting Ganga Jobs inside Notebook.
 
-This Project is currently under development, for demo/testing please follow these commands:
+## About
+[Ganga](https://ganga.web.cern.ch/ganga/) is a toolkit to make it easy to run data analysis jobs along with managing associated data files. It provide divide to split jobs into subjobs and submit them to different backends. Ganga intergace is available as [IPython](https://ipython.org/) shell and Python API. This project provides an interface for submitting jobs inside Notebooks.
+
+***
+
+![submitjob](https://preview.ibb.co/dyXtyT/submit_job.gif)
+
+## Installation
+This project is under development. For a quick test, run following commands.
+
 ```bash
-git clone https://github.com/apsknight/ganga_interface.git
-
-cd ganga_interface
-
-# For installing Frontend extension
-jupyter nbextension install extension/frontend
-jupyter nbextension enable frontend/extension
-
-# For installing Kernel Extension
-cp -r extension/ ~/.ipython/extensions/
-ipython profile create && \
-echo "c.InteractiveShellApp.extensions.append('extension')" >>  $(ipython profile locate default)/ipython_kernel_config.py
-
-# Run Jupyter Notebook
-cd Notebooks
-jupyter notebook
+https://github.com/apsknight/gangaextension.git
+cd gangaextension
+chmod u+x quick-install.sh
+./quick-install.sh
 ```
