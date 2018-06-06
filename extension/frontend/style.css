@@ -34,7 +34,7 @@ body {
 	padding: 0px 5px;
 }
 .pm .titlecollapse:hover {
-	background-color: #C45917;
+	background-color: #ef9b2d;
 }
 .headericon {
 	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAXUlEQVR4AWMAgVGwjkGKNA3/GT4wZDAwkqABDA8zaBKtAQp/MjQwsBGnAQGvMVgTpwEB/zFMZ+AjoAEDPmUIpKGGfwzTGPho5OmfDPUMbKREnAYpSSOdgZGSxDcKADdXTK1stp++AAAAAElFTkSuQmCC);
@@ -156,10 +156,10 @@ body {
 	/* border: 0 1px solid #c25e00; */
 }
 .pm .tabbutton:hover {
-	background-color: #C45917;
+	background-color: #ef9b2d;
 }
 .pm .cancelbutton:hover {
-	background-color: #C45917;
+	background-color: #ef9b2d;
 }
 .pm .tabbuttonactive {
 	/*color: white;*/

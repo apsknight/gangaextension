@@ -22,27 +22,15 @@ class GangaMonitor:
     """
     def __init__(self, ipython):
         self.ipython = ipython
-    
+        self.cell = None
+
     def __handle_incoming_msg(self, msg):
         print("Message recieved from frontend: \n %s \n" % str(msg))
         data = msg["content"]["data"]
         if data["msgtype"] == "cancel":
             ganga.jobs[int(data["id"])].kill()
-            # job_obj = self.job_obj
-            # job_status = {
-            #     "msgtype": "jobstatus",
-            #     "id": job_obj.id,
-            #     "status": str(job_obj.status),
-            # }
-            # if len(job_obj.subjobs) > 0:
-            #     job_status.update({"subjob_status": {}})
-            #     job_status.update({"subjob_runtime": {}})
-            #     for sj in job_obj.subjobs:
-            #         job_status["subjob_status"][str(sj.id)] = str(sj.status)
-            #         if (str(sj.status) is "completed"):
-            #             job_status["subjob_runtime"][str(sj.id)] = str(sj.time.runtime())
-
-            # self.send(job_status)
+        if data["msgtype"] == "cellinfo":
+            self.cell = data["cell_id"]
 
     def register_comm(self):
         self.ipython.kernel.comm_manager.register_target("GangaMonitor", self.comm_target)
@@ -73,13 +61,14 @@ class GangaMonitor:
         job_info = {
                 "msgtype": "jobinfo",
                 "id": job_obj.id,
+                "cell_id": self.cell,
                 "name": str(job_obj.name),
                 "backend": str(job_obj.backend.__class__.__name__),
                 "subjobs": len(job_obj.subjobs),
                 "status": "submitted",
                 "job_submission_time": str(job_obj.time.submitting())[:19],
                 "application": str(job_obj.application).split()[0],
-                "splitter": str(job_obj.splitter).split()[0],             
+                "splitter": str(job_obj.splitter).split()[0],            
             }
         if job_info["subjobs"] > 0:
             job_info.update({"subjob_submission_time": {}})
@@ -96,6 +85,7 @@ class GangaMonitor:
             job_status = {
                 "msgtype": "jobstatus",
                 "id": job_obj.id,
+                "cell_id": self.cell,
                 "status": str(job_obj.status),
             }
             if (job_status["status"] is "completed"):

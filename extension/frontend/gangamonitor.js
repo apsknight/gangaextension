@@ -16,6 +16,7 @@ define([
         // Communication object with kernel.
         this.comm = null;
         this.cell = null;
+        this.displaymonitor = {}
         this.startComm();
         // Fix Kernel interruption/restarting
         // events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
@@ -78,7 +79,12 @@ define([
             case "magic_execution_start":
                 console.log("GangaMonitor: Magic Execution Start");
                 this.cell = currentcell.getRunningCell();
-                console.log('This cell', this.cell);
+                console.log('GangaMonitor: This cell', this.cell);
+                cell_msg = {
+                    'msgtype': 'cellinfo',
+                    'cell_id': this.cell.cell_id
+                }
+                this.send(cell_msg)
                 break;
             case "jobinfo":
                 console.log('GangaMonitor: Job Info Recieved');
@@ -97,14 +103,14 @@ define([
             console.error('GangaMonitor: Job Started with no running cell');
             return;
         }
-        console.log('GangaMonitor: Job started at cell', cell.cell_id, data);
         var dismonitor = new displaymonitor.DisplayMonitor(this, cell, data);
-        this.displaymonitor = dismonitor;
+        this.displaymonitor[data.id] = dismonitor;
     }
 
     GangaMonitor.prototype.job_status_recieved = function (data) {
         console.log(data);
-        this.displaymonitor.updateContent(data);
+        console.log(this.displaymonitor)
+        this.displaymonitor[data.id].updateContent(data);
     }
 
     return {

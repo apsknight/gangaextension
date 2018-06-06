@@ -61,6 +61,7 @@ define([
         this.jobInfoData = data;
         this.subjobsCount = data.subjobs;
         this.contentVisible = true;
+        this.cell.element.find('.inner_cell .JobMonitor').remove();
         this.initializeDisplay();
         this.createContent();
     };
