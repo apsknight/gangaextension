@@ -4,9 +4,17 @@
  */
 
 define([
-    'base/js/namespace', 'require', 'base/js/events', './cellqueue', './displaymonitor'
+    'base/js/namespace',
+    'require',
+    'base/js/events',
+    './cellqueue',
+    './displaymonitor'
 ], function(
-    Jupyter, requirejs, events, currentcell, displaymonitor
+    Jupyter,
+    requirejs,
+    events,
+    currentcell,
+    displaymonitor
 ) {
     /**
      * @constructor - GangaMonitor object's constructor
