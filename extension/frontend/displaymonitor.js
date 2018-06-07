@@ -4,49 +4,22 @@
  */
 
 define([
-    'base/js/namespace', 'require', 'base/js/events', 'jquery', 'text!./jobmonitor.html', 'moment'
+    'base/js/namespace',
+    'require',
+    'base/js/events',
+    'jquery',
+    './load_file',
+    './time',
+    'text!./jobmonitor.html'
 ], function(
-    Jupyter, requirejs, events, $, WidgetHTML, moment
+    Jupyter,
+    requirejs,
+    events,
+    $,
+    load_file,
+    time,
+    WidgetHTML
 ) {
-
-    /**
-     * Function to asynchronously load static file.
-     * @param {string} name 
-     */
-    function load_css(name) {
-        var link = document.createElement("link");
-        link.type = "text/css";
-        link.rel = "stylesheet";
-        link.href = requirejs.toUrl(name);
-        document.getElementsByTagName("head")[0].appendChild(link);
-    };
-
-    /**
-     * Converts '2018-06-03 12:00:00' to 'Today at 12:00' 
-     * @param {string} date 
-     */
-    function format_date(date) {
-        return moment().subtract(date, 'YYYY-MM-DD hh:mm:ss').calendar();
-    }
-
-    /**
-     * Converts '3:33:33' to '3 hours 33 minutes 33 seconds 
-     * @param {string} time 
-     */
-    function format_time(time) {
-        var timeArray = time.toString().split(':');
-        var timeString = '';
-        if (timeArray[0] > 0) {
-            timeString = timeString + timeArray[0] + ' hours';
-        }
-        if (timeArray[1] > 0) {
-            timeString = timeString + timeArray[1] + ' minutes';
-        }
-        timeString = timeString + timeArray[2] + ' seconds';
-
-        return timeString;
-    }
-
     /**
      * Main singleton object for displaying frontend widget.
      * @param {GangaMonitor} monitor 
@@ -70,19 +43,21 @@ define([
      * Initialize display features
      */
     DisplayMonitor.prototype.initializeDisplay = function() {
-        load_css('./style.css');
+        load_file.load_css('./static/style.css');
         var that = this;
 
         // Append Widget to innercell
         var element = $(WidgetHTML).hide();
         this.displayElement = element;
+        element.find('.gangaicon').css('background-image', 'url("' + requirejs.toUrl('./static/gangaicon.png') + '")')
+        element.find('.resubmitbutton').hide()
         this.cell.element.find('.inner_cell').append(element);
         element.slideToggle();
 
         // Add callback to Stop Button
         element.find('.stopbutton').click(function () {
             console.log('GangaMoniotor: Stop request initiated from displaymonitor');
-            that.cancelJobRequest(that.jobInfoData);
+            that.cancelJobRequest();
         });
 
         // Add callback to close button
@@ -138,7 +113,6 @@ define([
         var that = this;
         var data = this.jobInfoData;
         var status = $('<span></span>').addClass(data.status.toUpperCase()).text(data.status.toUpperCase()).addClass('tditemjobstatus');
-
         // Add Job Info to widget
         this.add_data_to_tag('.backendbadge', data.backend.toUpperCase(), 'text');
         this.add_data_to_tag('.applicationbadge', data.application.toUpperCase(), 'text');
@@ -147,7 +121,7 @@ define([
         this.add_data_to_tag('.tdjobid', data.id, 'text');
         this.add_data_to_tag('.tdjobname', data.name, 'text');
         this.add_data_to_tag('.tdjobstatus', status, 'html');
-        this.add_data_to_tag('.tdjobstart', format_date(data.job_submission_time), 'text');
+        this.add_data_to_tag('.tdjobstart', time.format_date(data.job_submission_time), 'text');
         this.add_data_to_tag('.tdjobtime', '-', 'text');
 
         // Subjob Progress Bar
@@ -183,7 +157,7 @@ define([
                 var subjobrow = this.new_subjob_row();
                 subjobrow.find('.tdstageid').text(this.jobInfoData.id + '.' + i);        
                 subjobrow.find('.tdstagestatus').removeClass('tdstagestatus').addClass('tdstagestatus'+i);
-                subjobrow.find('.tdstagestarttime').text(format_date(data.subjob_submission_time[i]));
+                subjobrow.find('.tdstagestarttime').text(time.format_date(data.subjob_submission_time[i]));
                 subjobrow.find('.tdstageduration').removeClass('tdstageduration').addClass('tdstageduration'+i).text('-');
                 subjobrow.addClass('stagerow' + i);
                 this.displayElement.find('.stagetable tbody').append(subjobrow);
@@ -212,15 +186,22 @@ define([
      */
     DisplayMonitor.prototype.updateContent = function (data) {
         // Update Job Status Badge
+        var that = this;
         var status = $('<span></span>').addClass(data.status.toUpperCase()).text(data.status.toUpperCase()).addClass('tditemjobstatus');
+        if (data.status.toUpperCase() == "FAILED") {
+            this.displayElement.find('.resubmitbutton').show()
+            this.displayElement.find('.resubmitbutton').click(function () {
+                that.resubmitJobRequest();
+                that.displayElement.find('.resubmitbutton').hide();
+            });          
+        }
         this.add_data_to_tag('.tdjobstatus', status, 'html');
-
         // Hide stop button if Job is finished
         var endpoints = ["completed", "killed", "failed"];
         if (endpoints.includes(data.status)) {
             this.displayElement.find('.stopbutton').hide();
             if (data.status == "completed") {
-                this.displayElement.find('.tdjobtime').text(format_time(data.runtime));
+                this.displayElement.find('.tdjobtime').text(time.format_time(data.runtime));
             }
         }
 
@@ -236,7 +217,7 @@ define([
                     runningTask++;
                 }
                 if (data.subjob_status[i] == "completed") {
-                    this.displayElement.find('.tdstageduration' + i).text(format_time(data.subjob_runtime[i]));
+                    this.displayElement.find('.tdstageduration' + i).text(time.format_time(data.subjob_runtime[i]));
                 }
                 var subJobStatus = $('<span></span>').addClass(data.subjob_status[i].toUpperCase()).text(data.subjob_status[i].toUpperCase()).addClass('tditemjobstatus');
                 this.displayElement.find('.tdstagestatus'+i).html(subJobStatus);
@@ -254,10 +235,17 @@ define([
      * Function for sending Job Cancellation request to kernel extension.
      * @param {object} data - Job Info data
      */
-    DisplayMonitor.prototype.cancelJobRequest = function (data) {
-        cancelMsg = {'id': data.id,
+    DisplayMonitor.prototype.cancelJobRequest = function () {
+        cancelMsg = {'id': this.jobInfoData.id,
                     'msgtype': 'cancel'};
         this.monitor.send(cancelMsg);
+    }
+
+    DisplayMonitor.prototype.resubmitJobRequest = function () {
+        console.log('GangaMonitor: Sending resubmission request');
+        resubMsg = {'id': this.jobInfoData.id,
+                    'msgtype': 'resubmit'};
+        this.monitor.send(resubMsg); 
     }
 
     return {
