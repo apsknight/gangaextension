@@ -29,6 +29,18 @@ class GangaMonitor:
         data = msg["content"]["data"]
         if data["msgtype"] == "cancel":
             ganga.jobs[int(data["id"])].kill()
+        if data["msgtype"] == "resubmit":
+            id = int(data["id"])
+            job_obj = ganga.jobs[id]
+            if len(job_obj.subjobs) == 0 and str(job_obj.status) == "failed":
+                job_obj.resubmit()
+            else:
+                for sj in job_obj.subjobs:
+                    if str(sj.status) == "failed":
+                        sj.resubmit()
+            self.job_obj = job_obj
+            self.send_job_info()
+            self.send_job_status()
         if data["msgtype"] == "cellinfo":
             self.cell = data["cell_id"]
 
