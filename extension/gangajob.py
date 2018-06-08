@@ -3,6 +3,7 @@ import re
 from IPython.utils.io import capture_output
 import time
 from threading import Thread
+from cPickle import loads as pickle_loads
 
 # Import Ganga
 ganga_imported = False
@@ -114,7 +115,11 @@ class GangaMonitor:
             if (job_status["status"] in endpoints):
                 break
 
-    def run(self, raw_cell):
+    def run(self, raw_cell, ipython_ns):
+        # Update Current namespace with IPython's name space
+        ns_dict = pickle_loads(ipython_ns)
+        locals().update(ns_dict)
+
         job_obj_name = self.extract_job_obj(raw_cell)
         mirror_code = "job_obj = %s" % job_obj_name
 

@@ -13,7 +13,7 @@ define([
      * @param {string} date 
      */
     function format_date(date) {
-        return moment(date, 'YYYY-MM-DD hh:mm:ss').format('MMM Do, h:mm a');
+        return moment.utc(date, 'YYYY-MM-DD hh:mm:ss').local().format('MMM Do, h:mm a');
         // var start = $('<time></time>').addClass('timeago').attr('data-livestamp', date).attr('title', date.toString()).text(date.toString())
         // return start
     }
