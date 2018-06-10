@@ -110,7 +110,7 @@ class GangaMonitor:
                     job_status["subjob_status"][str(sj.id)] = str(sj.status)
                     if (str(sj.status) is "completed"):
                         job_status["subjob_runtime"][str(sj.id)] = str(sj.time.runtime())
-            time.sleep(1)
+            time.sleep(0.5)
             self.send(job_status)
             if (job_status["status"] in endpoints):
                 break
