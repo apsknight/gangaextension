@@ -59,7 +59,7 @@ define([
      * @param {object} msg - JSON recieve message object.
      */
     GangaMonitor.prototype.comm_msg = function (msg) {
-        console.log('GangaMonitor: Recieved message!', msg.content.data);
+        console.log('GangaMonitor: Recieved message!');
         this.handle_message(msg);
     }
 
@@ -87,7 +87,7 @@ define([
             case "magic_execution_start":
                 console.log("GangaMonitor: Magic Execution Start");
                 this.cell = currentcell.getRunningCell();
-                console.log('GangaMonitor: This cell', this.cell);
+                // console.log('GangaMonitor: This cell', this.cell);
                 cell_msg = {
                     'msgtype': 'cellinfo',
                     'cell_id': this.cell.cell_id
@@ -99,7 +99,7 @@ define([
                 this.job_info_recieved(data);
                 break;
             case "jobstatus":
-                console.log('GangaMonitor: Job Status Recieved');
+                console.log('GangaMonitor: Job Status Recieved: ', data.status);
                 this.job_status_recieved(data);
                 break;
         }
@@ -116,8 +116,8 @@ define([
     }
 
     GangaMonitor.prototype.job_status_recieved = function (data) {
-        console.log(data);
-        console.log(this.displaymonitor)
+        // console.log(data);
+        // console.log(this.displaymonitor)
         this.displaymonitor[data.id].updateContent(data);
     }
 
