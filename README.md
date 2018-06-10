@@ -9,11 +9,8 @@
 ![submitjob](https://image.ibb.co/j1B8Xo/submit_job.gif)
 
 ## Installation
-This project is under development. For a quick test, run following commands.
+This project is under development. For a quick test, run following command.
 
 ```bash
-https://github.com/apsknight/gangaextension.git
-cd gangaextension
-chmod u+x quick-install.sh
-./quick-install.sh
+docker run -it --rm -p 8888:8888 apsknight/gangaextension
 ```
