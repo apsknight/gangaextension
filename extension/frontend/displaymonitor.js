@@ -8,15 +8,13 @@ define([
     'require',
     'base/js/events',
     'jquery',
-    './load_file',
     './time',
-    'text!./jobmonitor.html'
+    'text!./static/jobmonitor.html'
 ], function(
     Jupyter,
     requirejs,
     events,
     $,
-    load_file,
     time,
     WidgetHTML
 ) {
@@ -43,7 +41,6 @@ define([
      * Initialize display features
      */
     DisplayMonitor.prototype.initializeDisplay = function() {
-        load_file.load_css('./static/style.css');
         var that = this;
 
         // Append Widget to innercell
@@ -58,6 +55,7 @@ define([
         element.find('.stopbutton').click(function () {
             console.log('GangaMoniotor: Stop request initiated from displaymonitor');
             that.cancelJobRequest();
+            that.displayElement.find('.stopbutton').hide();
         });
 
         // Add callback to close button
