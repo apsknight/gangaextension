@@ -1,19 +1,19 @@
 /**
- * Entrpoint module for Jupyter Notebook frontend extension
+ * Extension for Ganga Tab in Jupyter Tree view.
  * @module gangatreetab
  */
 
 define([
     './joblistbuilder',
-    './load_file',
-], function(
+    './load_file'
+], function (
     joblistbuilder,
     load_file
 ) {
     function insert_tab () {
         var tab_text = 'Ganga Jobs';
         var tab_id = 'ganga_jobs';
-        load_file.load_css('./static/style.css');        
+        load_file.load_css('./static/treetab.css');        
         var content = joblistbuilder.build_ui();
 
         $('<div/>')
@@ -27,7 +27,7 @@ define([
             .attr('href', '#' + tab_id)
             .attr('data-toggle', 'tab')
             .on('click', function (evt) {
-                window.history.pushState(null, null, '#' + tab_id);
+                window.history.pushState(null, null, '#' + tab_id);       
             });
 
         $('<li>')

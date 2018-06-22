@@ -1,0 +1,87 @@
+<div id="joblist" class="tab-pane active">
+    <div id="joblist_toolbar" class="row list_toolbar">
+        <div class="col-sm-8 no-padding">
+            <span id="list_info" class="job_toolbar_info">Select jobs to perform action on them.</span>
+            <div class="dynamic_job_button">
+                <button id="subjob-info" title="Show subjob info" class="subjob-info-button btn btn-default btn-xs" style="display: none;">Subjob info</button>
+                <button id="open-notebook" title="Open Job Notebook" class="job-info-button btn btn-default btn-xs" style="display: none;">Open Notebook</button>
+                <button id="job-cancel" title="Cancel selected Job(s)" class="cancel-job-button btn btn-default btn-xs btn-warning" style="display: none;">Cancel</button>
+                <button id="job-remove" title="Remove selected" class="remove-job-button btn btn-default btn-xs btn-danger" style="display: none;">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-sm-4 no-padding tree-buttons">
+            <div id="refresh_jobs" class="pull-right sort_button">
+                <span class="btn btn-xs btn-default" id="refresh-job-button" title="Refresh job list">
+                    <i class="fa fa-refresh"></i>
+                </span>
+            </div>
+            <div id="sort_ID" class="pull-right sort_button">
+                <span class="btn btn-xs btn-default" id="sort-ID" title="Sort by Job ID">
+                    Job ID
+                    <i class="fa fa-arrow-down" id="toggle-sort" style="display: none;"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <table class="jlist">
+                    <thead>
+                        <tr>
+                            <th class="thbutton">
+                                <div class="btn-group dropdown" id="tree-selector">
+                                    <button title="Select All / None" aria-label="Select All / None" type="button" class="btn btn-default btn-xs" id="button-select-all">
+                                        <input type="checkbox" class="pull-left tree-selector" id="select-jobs">
+                                        <span id="counter-select-jobs">0</span>
+                                    </button>
+                                    <button title="Select..." class="btn btn-default btn-xs dropdown-toggle" type="button" id="tree-selector-btn" data-toggle="dropdown"
+                                        aria-expanded="false">
+                                        <span class="caret"></span>
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul id="selector-menu" class="dropdown-menu" role="menu" aria-labelledby="tree-selector-btn">
+                                        <li role="presentation">
+                                            <a id="select-all-jobs" role="menuitem" tabindex="-1" href="#" title="Select All Jobs">
+                                            All Jobs</a>
+                                        </li>
+                                        <li role="presentation">
+                                            <a id="select-finished-jobs" role="menuitem" tabindex="-1" href="#" title="Select Finished Jobs">
+                                            Finished Jobs</a>
+                                        </li>
+                                        <li role="presentation">
+                                            <a id="select-running-jobs" role="menuitem" tabindex="-1" href="#" title="Select Running Jobs">
+                                            Pending Jobs</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th class="thid">Job ID</th>
+                            <th class="thname">Job Name</th>
+                            <th class="thbackend">Backend</th>
+                            <th class="thapplication">Application</th>
+                            <th class="thsubjobs">File Name</th>
+                            <th class="thstatus">Status</th>
+                            <th class="thstart">Submission Time</th>
+                            <th class="thtime">Runtime</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="panel-body">
+                <table class="jlist">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="pagination" class="page_buttons footer"></div>
+    <div id="overlay">
+        <div id="text">
+            <img alt="Ganga Loading"> Loading Job Data
+        </div>
+    </div>
+</div>
