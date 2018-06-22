@@ -198,6 +198,7 @@ define([
         var endpoints = ["completed", "killed", "failed"];
         if (endpoints.includes(data.status)) {
             this.displayElement.find('.stopbutton').hide();
+            this.displayElement.find('.closebutton').show();
             if (data.status == "completed") {
                 this.displayElement.find('.tdjobtime').text(time.format_time(data.runtime));
             }
