@@ -31,9 +31,10 @@ before_install:
   - sudo apt-get update -qq
   - python -m pip install jupyter
   - python -m pip install ganga
+  - python -m pip install ipython --upgrade
   - ipython profile create
-  - cp -r /extension/ $(ipython locate)/extensions/
-  - cp -f /test/gangajob.py $(ipython locate)/extensions/extension/gangajob.py
+  - cp -r extension/ $(ipython locate)/extensions/
+  - cp -f test/gangajob.py $(ipython locate)/extensions/extension/gangajob.py
 
 install:
   - echo "c.InteractiveShellApp.extensions.append('extension')" >> \
