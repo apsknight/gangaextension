@@ -33,13 +33,13 @@ before_install:
   - python -m pip install ganga
   - python -m pip install ipython --upgrade
   - ipython profile create
-  - cp -r extension/ $(ipython locate)/extensions/
-  - cp -f test/gangajob.py $(ipython locate)/extensions/extension/gangajob.py
+  - cp -r test/ $(ipython locate)/extensions/
+  - mv $(ipython locate)/extensions/test $(ipython locate)/extensions/extension
+  - ls $(ipython locate)/extensions/extension/
 
 install:
-  - echo "c.InteractiveShellApp.extensions.append('extension')" >> \
-    $(ipython profile locate default)/ipython_kernel_config.py
-  - jupyter nbextension install /extension/frontend --user
+  - echo "c.InteractiveShellApp.extensions.append('extension')" >> $(ipython profile locate default)/ipython_kernel_config.py
+  - jupyter nbextension install extension/frontend --user
   - jupyter nbextension enable frontend/extension --user
 
 script:
