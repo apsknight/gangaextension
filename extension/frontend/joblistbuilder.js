@@ -74,7 +74,7 @@ define([
             this.element = element;
             this.page = 1;
             this.size = 10; // Rows demanded per request (default to 10)
-            this.currentRows = size;
+            this.currentRows = this.size;
             this.page_count = 0;
             this.endpoint = list_endpoint + '?size=' + this.size;
 
