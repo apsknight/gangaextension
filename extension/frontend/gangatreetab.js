@@ -1,15 +1,23 @@
 /**
- * Extension for Ganga Tab in Jupyter Tree view.
+ * Tree section frontend extension for Ganga Tab in Jupyter Tree view.
+ * To enable this use "jupyter nbextension enable frontend/gangatreetab --section tree"
  * @module gangatreetab
  */
 
 define([
     './joblistbuilder',
-    './load_file'
+    './load_file',
+    'base/js/utils',
+    'services/kernels/kernel'
 ], function (
     joblistbuilder,
-    load_file
+    load_file,
+    utils,
+    kernel
 ) {
+    /**
+     * Insert Ganga Jobs tab in tree.
+     */
     function insert_tab () {
         var tab_text = 'Ganga Jobs';
         var tab_id = 'ganga_jobs';
@@ -39,6 +47,9 @@ define([
         }
     }
 
+    /**
+	 * Entrypoint function : Jupyter automatically detects and call this function.
+	 */
     function load_ipython_extension () {
         console.log('Loading Ganga Tab Extension')
         insert_tab();

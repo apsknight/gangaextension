@@ -29,7 +29,7 @@
 .jlist th {
     text-align: center;
 }
-.jlist td {
+.jlist td:not(:first-child) {
     text-align: center;
     padding: 5px 0px;
 }
@@ -81,16 +81,32 @@ tbody tr {
     padding: 5px 5px;
     /* border-bottom: 1px solid #ddd;     */
 }
-.jtable .thsubjobid {
-    width: 20%
+.subjobinforow {
+    display: none;
 }
-.jtable .thsubjobstatus {
-    width: 20%
+.jlist .subjobrow {
+    margin: 0;
+    display: block;
+    width: 100%;
+    height: 30px;
+    padding: 5px 0;
 }
-.jtable .thsubjobsubmissiontime {
-    width: 30%
+.jlist .subjobhead {
+    color: #333333;
+    font-size: 13px;
+    font-weight: bold;
+    background-color: #f5f5f5;
 }
-.jtable .thsubjobruntime {
+.jlist .thsubjobid {
+    width: 18%;
+}
+.jlist .thsubjobstatus {
+    width: 15%
+}
+.jlist .thsubjobstart {
+    width: 35%
+}
+.jlist .thsubjobtime {
     width: 30%
 }
 .SUBMITTED {
@@ -128,7 +144,7 @@ tbody tr {
 
 
 #overlay {
-    position: fixed;
+    /* position: fixed; */
     display: none;
     width: 100%;
     height: 100%;
@@ -138,7 +154,7 @@ tbody tr {
     bottom: 0;
     /* background-color: rgba(0, 0, 0, 0.5); */
     /* z-index: 2; */
-    cursor: pointer;
+    /* cursor: pointer; */
 }
 #text {
     position: absolute;
@@ -166,7 +182,7 @@ tbody tr {
 	white-space: nowrap;
 	font-weight: bold;
 	/*   display: none; */
-	margin: 0 2px;
+	margin: 0;
 }
 
 .badgeexecutor {
@@ -177,9 +193,41 @@ tbody tr {
   box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.36);
   white-space: nowrap;
   font-weight: bold;
-  margin: 0px 2px;
-  background-color: rgba(117, 57, 0, 0.65);
+  margin: 0;
+  background-color: #f0ad4d;
 }
 .subjobinfo {
     margin-bottom: 10px;
+    display: grid;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    /* background-color: #e7e7e7; */
+}
+
+.tdstageicon {
+    /* display: block; */
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAXUlEQVR4AWMAgVGwjkGKNA3/GT4wZDAwkqABDA8zaBKtAQp/MjQwsBGnAQGvMVgTpwEB/zFMZ+AjoAEDPmUIpKGGfwzTGPho5OmfDPUMbKREnAYpSSOdgZGSxDcKADdXTK1stp++AAAAAElFTkSuQmCC);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+    width: 15px;
+    display: inline-block;
+    top: -2px;
+    height: 12px;
+    /* vertical-align: middle; */
+    transition: transform 0.4s;
+    transform: rotate(0deg);
+    margin-right: 15px;
+  }
+  
+  .iconproxyspace {
+      padding-left: 33px;
+  }
+  .tdstageiconcollapsed {
+    transform: rotate(90deg);
+  }
+  .subjobtableoffset {
+      background-color: #f5f5f5;
+    vertical-align: top;
 }

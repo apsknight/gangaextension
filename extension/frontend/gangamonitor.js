@@ -7,12 +7,14 @@ define([
     'base/js/namespace',
     'require',
     'base/js/events',
+    'base/js/utils',
     './cellqueue',
     './displaymonitor'
 ], function(
     Jupyter,
     requirejs,
     events,
+    utils,
     currentcell,
     displaymonitor
 ) {
@@ -26,6 +28,10 @@ define([
         this.cell = null;
         this.displaymonitor = {}
         this.startComm();
+        var base_url = utils.get_body_data("baseUrl");
+        var path = utils.get_body_data("notebookPath");
+        this.location = utils.url_path_join(window.location.host, base_url, 'notebooks',
+                    utils.encode_uri_components(path));
         // Fix Kernel interruption/restarting
         // events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
     }
@@ -78,7 +84,13 @@ define([
         console.log('GangaMonitor: Comm Close Message:', msg);
     }
 
+    /**
+     * Function to habdle received messages from kernel based on msgtype.
+     * @param {object} msg - JSON message object.
+     */
     GangaMonitor.prototype.handle_message = function (msg) {
+        var channel = new BroadcastChannel('gangajlc');        
+        channel.postMessage(msg);
         var data = msg.content.data;
         if (!data.msgtype) {
             console.warn('GangaMonitor: Unknown Data Recieved');
@@ -90,7 +102,8 @@ define([
                 // console.log('GangaMonitor: This cell', this.cell);
                 cell_msg = {
                     'msgtype': 'cellinfo',
-                    'cell_id': this.cell.cell_id
+                    'cell_id': this.cell.cell_id,
+                    'nblocation': this.location
                 }
                 this.send(cell_msg)
                 break;
@@ -105,6 +118,11 @@ define([
         }
     }
 
+    /**
+     * Function for handling Job Info message.
+     * Creates a new instance of DisplayMonitor and assigns it to cell.
+     * @param {object} msg - JSON Job Info data.
+     */
     GangaMonitor.prototype.job_info_recieved = function (data) {
         var cell = this.cell;
         if (cell == null) {
@@ -115,9 +133,12 @@ define([
         this.displaymonitor[data.id] = dismonitor;
     }
 
+    /**
+     * Function for handling Job Status message.
+     * Send status to displaymonitor for updating frontend widget.
+     * @param {object} msg - JSON Job Status data.
+     */
     GangaMonitor.prototype.job_status_recieved = function (data) {
-        // console.log(data);
-        // console.log(this.displaymonitor)
         this.displaymonitor[data.id].updateContent(data);
     }
 

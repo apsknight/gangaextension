@@ -72,7 +72,11 @@ class Ganga(Magics):
         # logger.info("Sending Code to Ganga from kernel")
         # Start execution
         current_ns = pickle_dumps(self._pickle_ns())
-        monitor.run(code, (current_ns))
+        op = monitor.run(code, (current_ns))
+        if op[0].stderr:
+            print(op[0].stderr)
+        if op[0].stdout:
+            print(op[0].stdout)
 
 # Default ipython entrypoint for kernel extension.
 def load_ipython_extension(ipython):

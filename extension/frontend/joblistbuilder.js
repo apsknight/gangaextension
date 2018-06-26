@@ -7,7 +7,6 @@ define([
     'base/js/utils',
     'base/js/dialog',
     'jquery',
-    'bootstrap',
     './time',
     'text!./static/joblist.html',
     'text!./static/joblistrow.html',
@@ -18,29 +17,41 @@ define([
     utils,
     dialog,
     $,
-    bootstrap,
     time,
     joblistHTML,
     joblistRow,
     jobdialog,
     requirejs
 ) {
+        /**
+         * Function to load HTML templates, animation and sorting events.
+         */
         function build_ui() {
-            var job_per_page = 20;
-            var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist?size=' + job_per_page);
+            // const channel = new BroadcastChannel('gangajlc');
+            // channel.onmessage = function (e) {
+            //     console.log(e);
+            // };
+            var host = window.location.host; // Host URL
+            var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
             var skeleton = $(joblistHTML);
             var element = $(skeleton);
             element.find('#text img').attr('src', requirejs.toUrl('./static/gangaicon.gif'));
             element.find('#select-jobs').indeterminate = true;
-            var obj = new getJobs(list_endpoint, element, job_per_page);
+            var obj = new getJobs(list_endpoint, element);
 
 
             element.find('#sort-ID').click(function () {
                 element.find('#sort-ID i').show().toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+                var i = 0;
                 element.find('.jlist tbody tr').each(function () {
                     var row = $(this).detach();
-                    // console.log(row);
-                    element.find('.jlist tbody').prepend(row);
+                    if (i % 2 == 0) {
+                        element.find('.jlist tbody').prepend(row);
+                    }
+                    else {
+                        row.insertAfter(".jlist tbody tr:first")
+                    }
+                    i++;
                 });
             });
 
@@ -54,17 +65,25 @@ define([
             return element;
         }
 
-        function getJobs(list_endpoint, element, size) {
-            this.endpoint = list_endpoint;
+        /**
+         * @constructor - Constructor for singleton object responsible for rendering list.
+         * @param {string} list_endpoint - Base endpoint url for Ganga Server Extension.
+         * @param {object} element - Display Element
+         */
+        function getJobs(list_endpoint, element) {
             this.element = element;
             this.page = 1;
-            this.size = size; // Rows demanded per request
+            this.size = 10; // Rows demanded per request (default to 10)
             this.currentRows = size;
             this.page_count = 0;
+            this.endpoint = list_endpoint + '?size=' + this.size;
 
             this.getData(this.endpoint);
         }
-
+        /**
+         * Function for making asynchronous AJAX request to Ganga Server Extension
+         * @param {string} endpoint 
+         */
         getJobs.prototype.getData = function (endpoint) {
             var that = this;
             this.element.find('#overlay').css('display', 'block');
@@ -73,6 +92,10 @@ define([
                 that.buildList(result);
             });
         }
+        /**
+         * Function for creting Job List using the result obtained from AJAX request.
+         * @param {object} result 
+         */
         getJobs.prototype.buildList = function (result) {
             var that = this;
             that.element.find('#pagination').empty();
@@ -80,10 +103,12 @@ define([
             that.start_index = result.start;
 
             for (var i = 0; i < that.page_count; i++) {
-                var pagination = $('<span class="btn btn-xs btn-default" id="p' + (i + 1) +
+                var high_bound = result.total_jobs - 1 - i * (result.size);
+                var low_bound = high_bound - result.size + 1;
+                var pagination = $('<span title="' + low_bound + '-' + high_bound + '"class="btn btn-xs btn-default" id="p' + (i + 1) +
                     '" style="margin: 0 2px;">' + (i + 1) + '</span>')
                 that.element.find('#pagination').append(pagination);
-                that.element.find('#p' + (that.page)).addClass('active disabled');
+                that.element.find('#p' + (that.page)).addClass('active disabled').css('pointer-events', 'none');
                 pagination.click(function () {
                     that.resetElement();
                     that.element.find('#toggle-sort').hide();
@@ -109,47 +134,79 @@ define([
                 row.find('.thsubjobs').text(jobdata.file_name);
                 row.find('.thstatus').html($('<span></span>').addClass(jobdata.status.toUpperCase()).text(jobdata.status.toUpperCase()));
                 if (jobdata.status == 'new') {
-                    row.find('.thstart').text('-');                    
+                    row.find('.thstart').text('-');
                 }
                 else {
                     row.find('.thstart').text(time.format_date(jobdata.job_submission_time));
                     row.find('.thstart').attr('title', jobdata.job_submission_time + 'UTC');
                 }
-                console.log(jobdata);
                 if ('runtime' in jobdata && jobdata.runtime != 'None') {
                     row.find('.thtime').text(time.format_time(jobdata.runtime));
-                    row.find('.thtime').attr('title', jobdata.runtime);                    
+                    row.find('.thtime').attr('title', jobdata.runtime);
                 }
                 else {
-                    row.find('.thtime').text('-');                    
+                    row.find('.thtime').text('-');
                 }
+                row.find('.splitterbadge').text(jobdata.splitter);
+                row.find('.subjobcount').text(jobdata.subjobs);
+                if (jobdata.subjobs > 0) {
+                    $.each(jobdata.subjob_status, function (subjob_id, subjobdata) {
+                        var subjobrow = $('<div class="subjobrow">\
+                        <span class="thsubjobid" style="display: inline-block;">Subjob ID</span>\
+                        <span class="thsubjobstatus" style="display: inline-block;">Status</span>\
+                        <span class="thsubjobstart" style="display: inline-block;">Submssion Time</span>\
+                        <span class="thsubjobtime" style="display: inline-block;">Runtime</span>\
+                    </div>')
+                        subjobrow.find('.thsubjobid').text(id + '.' + subjob_id);
+                        subjobrow.find('.thsubjobstatus').html($('<span></span>').addClass(subjobdata.status.toUpperCase()).text(subjobdata.status.toUpperCase()));
+                        subjobrow.find('.thsubjobstart').text(time.format_date(subjobdata.subjob_submission_time));
+                        if ('runtime' in subjobdata && subjobdata.runtime != 'None') {
+                            subjobrow.find('.thsubjobtime').text(time.format_time(subjobdata.runtime));
+                        }
+                        else {
+                            subjobrow.find('.thsubjobtime').text('-');
+                        }
+                        row.find('.subjobrows').append(subjobrow);
+                        row.find('.splitterbadge').show();
+                    });
+                }
+                else {
+                    row.find('.tdstageicon').hide();
+                    row.find('.thbutton').addClass('iconproxyspace');
+                }
+                row.find('.tdstageicon').click(function () {
+                    row.find('.tdstageicon').toggleClass('tdstageiconcollapsed');
+                    $(row[2]).toggle(500);
+                });
+
                 that.element.find('.jlist tbody').prepend(row);
             });
 
             this.element.find('#select-all-jobs').click(function () {
-                // var that = this;
-                // that.element.find('#select-jobs').prop('indeterminate', false);
-                // that.element.find('#select-jobs').prop('checked', false);
-                // that.element.find('#counter-select-jobs').text(0); 
                 that.currentRows = that.size;
+                var i = 0;
                 that.element.find('.jlist tbody tr').each(function () {
                     $(this).find('input:checkbox[name="job_row"]').attr('checked', false);
-                    $(this).show();
+                    $(this).find('.tdstageicon').removeClass('tdstageiconcollapsed');
+                    if (i % 2 == 0) {
+                        $(this).show();
+                    }
+                    else {
+                        $(this).hide();
+                    }
+                    i++;
                 });
-                that.resetElement();               
+                that.resetElement();
             });
             this.element.find('#select-finished-jobs').click(function () {
-                // var that = this;
-                // that.element.find('#select-jobs').prop('indeterminate', false);
-                // that.element.find('#select-jobs').prop('checked', false);
-                // that.element.find('#counter-select-jobs').text(0);  
                 that.currentRows = that.size;
                 that.element.find('.jlist tbody tr').each(function () {
                     $(this).show();
-                    $(this).find('input:checkbox[name="job_row"]').attr('checked', false);                    
+                    $(this).find('input:checkbox[name="job_row"]').attr('checked', false);
+                    $(this).find('.tdstageicon').removeClass('tdstageiconcollapsed');
                     var status = $(this).find('.thstatus').text().toLowerCase();
-                    that.resetElement();                                             
-                    // console.log(status);
+                    that.resetElement();
+                    console.log(status);
                     if (status != 'completed' && status != 'killed' && status != 'failed') {
                         $(this).hide();
                         that.currentRows--;
@@ -157,16 +214,13 @@ define([
                 });
             });
             this.element.find('#select-running-jobs').click(function () {
-                // var that = this;
-                // that.element.find('#select-jobs').prop('indeterminate', false);
-                // that.element.find('#select-jobs').prop('checked', false);
-                // that.element.find('#counter-select-jobs').text(0); 
                 that.currentRows = that.size;
                 that.element.find('.jlist tbody tr').each(function () {
                     $(this).show();
-                    $(this).find('input:checkbox[name="job_row"]').attr('checked', false);                    
+                    $(this).find('input:checkbox[name="job_row"]').attr('checked', false);
                     var status = $(this).find('.thstatus').text().toLowerCase();
-                    that.resetElement();                                              
+                    that.resetElement();
+                    $(this).find('.tdstageicon').removeClass('tdstageiconcollapsed');
                     if (status != 'running' && status != 'new' && status != 'submitted') {
                         $(this).hide();
                         that.currentRows--;
@@ -189,21 +243,18 @@ define([
                         that.element.find('.job_toolbar_info').hide();
                         that.element.find('.dynamic_job_button button').show();
                         that.element.find('#select-jobs').prop('indeterminate', true);
-                        // that.element.find('#select-jobs').data('indeterminate', true);
                         if (checked_boxes != 1) {
                             that.element.find('#job-cancel').hide();
                             that.element.find('#open-notebook').hide();
-                        }
-                        else if (checked_boxes == 1 && ) {
-                            
                         }
                     }
                     else if (checked_boxes == that.currentRows) {
                         that.element.find('.job_toolbar_info').hide();
                         that.element.find('.dynamic_job_button button').show();
+                        that.element.find('#job-cancel').hide();
+                        that.element.find('#open-notebook').hide();
                         that.element.find('#select-jobs').prop('indeterminate', false);
                         that.element.find('#select-jobs').prop('checked', true);
-                        // that.element.find('#select-jobs').data('indeterminate', false);
                     }
                     else {
                         that.element.find('.dynamic_job_button button').hide();
@@ -214,216 +265,33 @@ define([
                 });
             var select_all = this.element.find('#select-jobs');
             var that = this;
-            // console.log(checkboxes);
             select_all.change(
                 function () {
-                    // console.log(this.indeterminate);
                     if (this.checked) {
                         that.element.find('.job_toolbar_info').hide();
                         that.element.find('.dynamic_job_button button').show();
+                        that.element.find('#job-cancel').hide();
+                        that.element.find('#open-notebook').hide();
                         checkboxes.filter(':visible').prop('checked', true);
                         that.element.find('#counter-select-jobs').text(that.currentRows);
-                        // console.log('Xhecked');
                     }
                     else {
                         checkboxes.filter(':visible').prop('checked', false);
                         that.resetElement();
-                        // that.element.find('#counter-select-jobs').text(0);
-                        // that.element.find('.dynamic_job_button button').hide();
-                        // that.element.find('.job_toolbar_info').show();
-                        // console.log('Dhecked');                                              
                     }
                 }
             );
-            this.element.find('#subjob-info').click(function () {
-                for (var i = 0; i < checkboxes.length; i++) {
-                    if (checkboxes[i].checked) {
-                        that.create_model($(checkboxes[i]).parent().next().text(), result.data);
-                    }
-                }
-            });
         }
 
+        /**
+         * Reset element to original state.
+         */
         getJobs.prototype.resetElement = function () {
             this.element.find('.dynamic_job_button button').hide();
             this.element.find('.job_toolbar_info').show();
             this.element.find('#select-jobs').prop('indeterminate', false);
             this.element.find('#select-jobs').prop('checked', false);
-            this.element.find('#counter-select-jobs').text(0);                            
-        }
-        // function getJobs(list_endpoint, element, page, size) {
-        //     element.find('#pagination').empty();
-        //     element.find('.jlist tbody').empty();
-        //     element.find('#overlay').css('display', 'block');
-        //     $.getJSON(list_endpoint, function (result) {
-        //         element.find('#overlay').css('display', 'none');
-        //         var count = Math.ceil(result.total_jobs / result.size);
-        //         for (var i = 0; i < count; i++) {
-        //             var pagination = $('<span class="btn btn-xs btn-default" id="p' + (i + 1) + '" style="margin: 0 2px;">'
-        //                 + (i + 1) +
-        //                 '</span>')
-        //             element.find('#pagination').append(pagination);
-        //             pagination.click(function () {
-        //                 element.find('#p' + (page)).removeClass('active');
-        //                 element.find('#pagination').empty();
-        //                 element.find('.jlist tbody').empty();
-        //                 new_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist' + '?size=' + size + '&start=' + (result.start - ($(this).attr('id').split('p')[1] - page) * size));
-        //                 console.log(new_endpoint);
-        //                 getJobs(new_endpoint, element, $(this).attr('id').split('p')[1], size);
-        //             });
-        //         }
-        //         element.find('#p' + (page)).addClass('active disabled');
-        //         $.each(result.data, function (id, jobdata) {
-        //             var row = $(joblistRow);
-        //             row.find('.thid').text(id);
-        //             row.find('.thname').text(jobdata.name);
-        //             row.find('.thbackend').text(jobdata.backend);
-        //             row.find('.thapplication').text(jobdata.application);
-        //             row.find('.thsubjobs').text(jobdata.file_name);
-        //             row.find('.thstatus').html($('<span></span>').addClass(jobdata.status.toUpperCase()).text(jobdata.status.toUpperCase()));
-        //             row.find('.thstart').text(time.format_date(jobdata.job_submission_time));
-        //             row.find('.thtime').text('-');
-        //             element.find('.jlist tbody').prepend(row);
-        //         });
-        //         // element.find('#button-select-all').click(function () {
-        //         //     checkboxes.prop('checked', !checkboxes.prop('checked'));                
-        //         // });
-        //         element.find('#select-finished-jobs').click(function () {
-        //             element.find('.jlist tbody').empty();
-        //             $.each(result.data, function (id, jobdata) {
-        //                 if (jobdata.status == 'completed' || jobdata.status == 'killed' || jobdata.status == 'failed') {
-        //                     var row = $(joblistRow);
-        //                     row.find('.thid').text(id);
-        //                     row.find('.thname').text(jobdata.name);
-        //                     row.find('.thbackend').text(jobdata.backend);
-        //                     row.find('.thapplication').text(jobdata.application);
-        //                     row.find('.thsubjobs').text(jobdata.file_name);
-        //                     row.find('.thstatus').html($('<span></span>').addClass(jobdata.status.toUpperCase()).text(jobdata.status.toUpperCase()));
-        //                     row.find('.thstart').text(time.format_date(jobdata.job_submission_time));
-        //                     row.find('.thtime').text('-');
-        //                     element.find('.jlist tbody').prepend(row);
-        //                 }
-        //             });
-        //         });
-        //         element.find('#select-running-jobs').click(function () {
-        //             element.find('.jlist tbody').empty();
-        //             $.each(result.data, function (id, jobdata) {
-        //                 if (jobdata.status == 'running' || jobdata.status == 'new' || jobdata.status == 'submitted') {
-        //                     var row = $(joblistRow);
-        //                     row.find('.thid').text(id);
-        //                     row.find('.thname').text(jobdata.name);
-        //                     row.find('.thbackend').text(jobdata.backend);
-        //                     row.find('.thapplication').text(jobdata.application);
-        //                     row.find('.thsubjobs').text(jobdata.file_name);
-        //                     row.find('.thstatus').html($('<span></span>').addClass(jobdata.status.toUpperCase()).text(jobdata.status.toUpperCase()));
-        //                     row.find('.thstart').text(time.format_date(jobdata.job_submission_time));
-        //                     row.find('.thtime').text('-');
-        //                     element.find('.jlist tbody').prepend(row);
-        //                 }
-        //             });
-        //         });
-        //         var checkboxes = element.find('input:checkbox[name="job_row"]');
-        //         var checkbox_count = checkboxes.length;
-        //         checkboxes.change(
-        //             function () {
-        //                 var checked_boxes = 0;
-        //                 for (var i = 0; i < checkbox_count; i++) {
-        //                     if (checkboxes[i].checked) {
-        //                         checked_boxes++;
-        //                     }
-        //                 }
-        //                 element.find('#counter-select-jobs').text(checked_boxes);
-        //                 if (checked_boxes > 0 && checked_boxes != checkbox_count) {
-        //                     element.find('.job_toolbar_info').hide();
-        //                     element.find('.dynamic_job_button button').show();
-        //                     element.find('#select-jobs').prop('indeterminate', true);
-        //                     // element.find('#select-jobs').data('indeterminate', true);
-        //                 }
-        //                 else if (checked_boxes == checkbox_count) {
-        //                     element.find('.job_toolbar_info').hide();
-        //                     element.find('.dynamic_job_button button').show();
-        //                     element.find('#select-jobs').prop('indeterminate', false);
-        //                     element.find('#select-jobs').prop('checked', true);
-        //                     // element.find('#select-jobs').data('indeterminate', false);
-        //                 }
-        //                 else {
-        //                     element.find('.dynamic_job_button button').hide();
-        //                     element.find('.job_toolbar_info').show();
-        //                     element.find('#select-jobs').prop('indeterminate', false);
-        //                     element.find('#select-jobs').prop('checked', false);
-        //                 }
-        //             }
-        //         );
-
-        //         var select_all = element.find('#select-jobs');
-        //         select_all.change(
-        //             function () {
-        //                 // console.log(this.indeterminate);
-        //                 if (this.checked) {
-        //                     element.find('.job_toolbar_info').hide();
-        //                     element.find('.dynamic_job_button button').show();
-        //                     checkboxes.prop('checked', true);
-        //                     element.find('#counter-select-jobs').text(checkbox_count);
-        //                     // console.log('Xhecked');
-        //                 }
-        //                 else {
-        //                     checkboxes.prop('checked', false);
-        //                     element.find('#counter-select-jobs').text(0);
-        //                     element.find('.dynamic_job_button button').hide();
-        //                     element.find('.job_toolbar_info').show();
-        //                     // console.log('Dhecked');                                              
-        //                 }
-        //             }
-        //         );
-        //         element.find('#subjob-info').click(function () {
-        //             for (var i = 0; i < checkboxes.length; i++) {
-        //                 if (checkboxes[i].checked) {
-        //                     create_model($(checkboxes[i]).parent().next().text(), result.data);
-        //                 }
-        //             }
-        //         });
-        //     })
-        // }
-
-        getJobs.prototype.create_model = function (id, data) {
-            // console.log(id);
-            var jdialog = $(jobdialog);
-            if (data[id].subjobs > 0) {
-                jdialog.find('.splitterbadge').text(data[id].splitter);
-                console.log(data.splitter);
-                jdialog.find('.subjobcount').text(data[id].subjobs);
-                $.each(data[id].subjob_status, function (subjob_id, subjobdata) {
-                    var row = $('<tr>\
-                        <td class="thsubjobid"></td>\
-                        <td class="thsubjobstatus">Running</td>\
-                        <td class="thsubjobsubmissiontime">June 4th, 2018</td>\
-                        <td class="thsubjobruntime">-</td>\
-                    </tr>')
-                    row.find('.thsubjobid').text(id + '.' + subjob_id);
-                    row.find('.thsubjobstatus').html($('<span></span>').addClass(subjobdata.status.toUpperCase()).text(subjobdata.status.toUpperCase()));
-                    row.find('.thsubjobsubmissiontime').text(time.format_date(subjobdata.subjob_submission_time));
-                    // row.find('.thsubjobruntime').text('-');
-                    if ('runtime' in subjobdata && subjobdata.runtime != 'None') {
-                        row.find('.thsubjobruntime').text(time.format_time(subjobdata.runtime));
-                    }
-                    else {
-                        row.find('.thsubjobruntime').text('-');                    
-                    }
-                    jdialog.find('.jtable tbody').append(row);
-                });
-            }
-            else {
-                jdialog = 'There are no subjobs for Job#' + id;
-            }
-
-            dialog.modal({
-                title: 'Ganga subjob info: Job#' + id,
-                body: jdialog,
-                buttons: {
-                    Close: {}
-                }
-            });
-            // jdialog.find('.gangaicon').css('background-image', 'url("' + requirejs.toUrl('./static/gangaicon.png') + '")')            
+            this.element.find('#counter-select-jobs').text(0);
         }
 
         return {

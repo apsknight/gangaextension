@@ -232,7 +232,6 @@ define([
 
     /**
      * Function for sending Job Cancellation request to kernel extension.
-     * @param {object} data - Job Info data
      */
     DisplayMonitor.prototype.cancelJobRequest = function () {
         cancelMsg = {'id': this.jobInfoData.id,
@@ -240,6 +239,9 @@ define([
         this.monitor.send(cancelMsg);
     }
 
+    /**
+     * Function for sending Job resubmit request to kernel extension.
+     */
     DisplayMonitor.prototype.resubmitJobRequest = function () {
         console.log('GangaMonitor: Sending resubmission request');
         resubMsg = {'id': this.jobInfoData.id,

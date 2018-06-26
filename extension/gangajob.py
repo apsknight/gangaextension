@@ -24,6 +24,7 @@ class GangaMonitor:
     def __init__(self, ipython):
         self.ipython = ipython
         self.cell = None
+        self.ipython.run_code("import ganga.ganga")
 
     def __handle_incoming_msg(self, msg):
         print("Message recieved from frontend: \n %s \n" % str(msg))
@@ -70,7 +71,7 @@ class GangaMonitor:
         return str(obj_name)
 
     def send_job_info(self):
-        job_obj = self.job_obj
+        job_obj = self.ipython.user_ns['job_obj']
         job_info = {
                 "msgtype": "jobinfo",
                 "id": job_obj.id,
@@ -91,10 +92,11 @@ class GangaMonitor:
         self.send(job_info)
 
     def send_job_status(self):
-        job_obj = self.job_obj
+        job_obj = self.ipython.user_ns['job_obj']
         endpoints = ["completed", "killed", "failed"]
         while True:
-            ganga.runMonitoring()
+            self.ipython.run_code('ganga.runMonitoring()')
+            job_obj = self.ipython.user_ns['job_obj']
             job_status = {
                 "msgtype": "jobstatus",
                 "id": job_obj.id,
@@ -117,23 +119,28 @@ class GangaMonitor:
 
     def run(self, raw_cell, ipython_ns):
         # Update Current namespace with IPython's name space
-        ns_dict = pickle_loads(ipython_ns)
-        locals().update(ns_dict)
+        # ns_dict = pickle_loads(ipython_ns)
+        # locals().update(ns_dict)
 
         job_obj_name = self.extract_job_obj(raw_cell)
         mirror_code = "job_obj = %s" % job_obj_name
 
         try:
             with capture_output() as ganga_job_output:
-                exec(raw_cell)
-                ganga.runMonitoring()
-                print("GangaMonitor: Monitoring ON")
+                self.ipython.run_code(raw_cell)
+                self.ipython.run_code('ganga.runMonitoring()')
+                # print("GangaMonitor: Monitoring ON")
         except Exception as e:
             print("GangaMonitor: %s" % str(e))
         else:
-            exec(mirror_code)
-            self.job_obj = job_obj
+            self.ipython.run_code(mirror_code)
+            # self.job_obj = job_obj
             self.send_job_info()
             # Start new thread for sending status
             status_thread = Thread(target=self.send_job_status, args=())
             status_thread.start()
+            # self.ipython.run_code('import ganga.ganga')
+            # self.ipython.run_code('ganga.runMonitoring()')
+            # self.ipython.run_code('%s = ganga.jobs[%s]' % (job_obj_name, job_obj.id))
+            return [ganga_job_output]
+            # return ganga_job_output.stdout()
