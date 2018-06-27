@@ -3,7 +3,6 @@ import re
 from IPython.utils.io import capture_output
 import time
 from threading import Thread
-from cPickle import loads as pickle_loads
 
 # Import Ganga
 ganga_imported = False
@@ -28,9 +27,14 @@ class GangaMonitor:
 
     def __handle_incoming_msg(self, msg):
         print("Message recieved from frontend: \n %s \n" % str(msg))
+
         data = msg["content"]["data"]
+
+        # If cancellation is requested, kill the job.
         if data["msgtype"] == "cancel":
             ganga.jobs[int(data["id"])].kill()
+        
+        # If resubmission is requested, resubmit job and start monitoring thread.
         if data["msgtype"] == "resubmit":
             id = int(data["id"])
             job_obj = ganga.jobs[id]
@@ -43,6 +47,8 @@ class GangaMonitor:
             self.job_obj = job_obj
             self.send_job_info()
             self.send_job_status()
+
+        # If cellinfo is recieved, store it.
         if data["msgtype"] == "cellinfo":
             self.cell = data["cell_id"]
 
@@ -56,21 +62,43 @@ class GangaMonitor:
         @self.comm.on_msg
         def _recv(msg):
             self.__handle_incoming_msg(msg)
+
+        # Send commopen message
         self.comm.send({"msgtype": "commopen"})
 
     def send(self, msg):
         self.comm.send(msg)
 
-    def extract_job_obj(self, code): # Handle not found error
+    def extract_job_obj(self, code):
+        """
+        Extract the job object from cell magic code.
+        For Ex. if code is:
+        > j = Ganga.Job()
+        > # j2 = Ganga.Job()
+        > # j2.submit()
+        > j.submit()
+        This method will return 'j'.
+        """
+
+        # Remove comments from code
+        code = re.sub(r'(?m)^ *#.*\n?', '', code)
+
         regex = r"(\w+)\s*=\s*ganga.Job\(\)"
         matches = re.finditer(regex, code, re.MULTILINE)
 
+        obj_name = ""
         for match in matches:
             obj_name = match.group(1)
         
+        if obj_name == "":
+            raise Exception('No Job is defined in magic cell')
+
         return str(obj_name)
 
     def send_job_info(self):
+        """
+        Send informtion related to Job to frontend.
+        """
         job_obj = self.ipython.user_ns['job_obj']
         job_info = {
                 "msgtype": "jobinfo",
@@ -92,6 +120,9 @@ class GangaMonitor:
         self.send(job_info)
 
     def send_job_status(self):
+        """
+        Send status of job to frontend
+        """
         job_obj = self.ipython.user_ns['job_obj']
         endpoints = ["completed", "killed", "failed"]
         while True:
@@ -117,11 +148,10 @@ class GangaMonitor:
             if (job_status["status"] in endpoints):
                 break
 
-    def run(self, raw_cell, ipython_ns):
-        # Update Current namespace with IPython's name space
-        # ns_dict = pickle_loads(ipython_ns)
-        # locals().update(ns_dict)
-
+    def run(self, raw_cell):
+        """
+        Submit job in kernel, send info and start monitoring thread.
+        """
         job_obj_name = self.extract_job_obj(raw_cell)
         mirror_code = "job_obj = %s" % job_obj_name
 
@@ -129,18 +159,12 @@ class GangaMonitor:
             with capture_output() as ganga_job_output:
                 self.ipython.run_code(raw_cell)
                 self.ipython.run_code('ganga.runMonitoring()')
-                # print("GangaMonitor: Monitoring ON")
         except Exception as e:
             print("GangaMonitor: %s" % str(e))
         else:
             self.ipython.run_code(mirror_code)
-            # self.job_obj = job_obj
             self.send_job_info()
             # Start new thread for sending status
             status_thread = Thread(target=self.send_job_status, args=())
             status_thread.start()
-            # self.ipython.run_code('import ganga.ganga')
-            # self.ipython.run_code('ganga.runMonitoring()')
-            # self.ipython.run_code('%s = ganga.jobs[%s]' % (job_obj_name, job_obj.id))
             return [ganga_job_output]
-            # return ganga_job_output.stdout()
