@@ -231,3 +231,7 @@ tbody tr {
       background-color: #f5f5f5;
     vertical-align: top;
 }
+
+.nblocation {
+    margin-top: 4px;
+}

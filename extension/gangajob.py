@@ -30,6 +30,9 @@ class GangaMonitor:
 
         data = msg["content"]["data"]
 
+        if data["msgtype"] == "nblocation":
+            ganga.jobs[int(data["id"])].comment = str(data['nblocation'])
+
         # If cancellation is requested, kill the job.
         if data["msgtype"] == "cancel":
             ganga.jobs[int(data["id"])].kill()
@@ -154,7 +157,6 @@ class GangaMonitor:
         """
         job_obj_name = self.extract_job_obj(raw_cell)
         mirror_code = "job_obj = %s" % job_obj_name
-
         try:
             with capture_output() as ganga_job_output:
                 self.ipython.run_code(raw_cell)

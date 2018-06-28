@@ -30,7 +30,7 @@ define([
         this.startComm();
         var base_url = utils.get_body_data("baseUrl");
         var path = utils.get_body_data("notebookPath");
-        this.location = utils.url_path_join(window.location.host, base_url, 'notebooks',
+        this.location = utils.url_path_join(base_url, 'notebooks',
                     utils.encode_uri_components(path));
         // Fix Kernel interruption/restarting
         // events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
@@ -103,7 +103,6 @@ define([
                 cell_msg = {
                     'msgtype': 'cellinfo',
                     'cell_id': this.cell.cell_id,
-                    'nblocation': this.location
                 }
                 this.send(cell_msg)
                 break;
@@ -131,6 +130,7 @@ define([
         }
         var dismonitor = new displaymonitor.DisplayMonitor(this, cell, data);
         this.displaymonitor[data.id] = dismonitor;
+        this.send({'msgtype': 'nblocation', 'id': data.id, 'nblocation': this.location});
     }
 
     /**

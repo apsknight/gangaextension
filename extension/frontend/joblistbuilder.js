@@ -27,11 +27,7 @@ define([
          * Function to load HTML templates, animation and sorting events.
          */
         function build_ui() {
-            // const channel = new BroadcastChannel('gangajlc');
-            // channel.onmessage = function (e) {
-            //     console.log(e);
-            // };
-            var host = window.location.host; // Host URL
+
             var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
             var skeleton = $(joblistHTML);
             var element = $(skeleton);
@@ -53,6 +49,38 @@ define([
                     }
                     i++;
                 });
+            });
+
+            element.find('#jobs10').click(function () {
+                element.find('tbody').empty();
+                element.find('#pagination').empty();
+                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                obj.changeSize(10, list_endpoint);
+                obj.getData(obj.endpoint);
+            });
+
+            element.find('#jobs20').click(function () {
+                element.find('tbody').empty();
+                element.find('#pagination').empty();
+                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                obj.changeSize(20, list_endpoint);
+                obj.getData(obj.endpoint);
+            });
+
+            element.find('#jobs50').click(function () {
+                element.find('tbody').empty();
+                element.find('#pagination').empty();
+                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                obj.changeSize(50, list_endpoint);
+                obj.getData(obj.endpoint);
+            });
+
+            element.find('#jobs100').click(function () {
+                element.find('tbody').empty();
+                element.find('#pagination').empty();
+                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                obj.changeSize(100, list_endpoint);
+                obj.getData(obj.endpoint);
             });
 
             element.find('#refresh-job-button').click(function () {
@@ -80,11 +108,23 @@ define([
 
             this.getData(this.endpoint);
         }
+
+        /**
+         * Change Jobs per page size.
+         * @param {var} size 
+         */
+        getJobs.prototype.changeSize = function (size, list_endpoint) {
+            this.size = size;
+            this.endpoint = list_endpoint + '?size=' + this.size;            
+            console.log('csize');
+        }
+
         /**
          * Function for making asynchronous AJAX request to Ganga Server Extension
          * @param {string} endpoint 
          */
         getJobs.prototype.getData = function (endpoint) {
+            console.log(endpoint);
             var that = this;
             this.element.find('#overlay').css('display', 'block');
             $.getJSON(endpoint, function (result) {
@@ -105,7 +145,7 @@ define([
             for (var i = 0; i < that.page_count; i++) {
                 var high_bound = result.total_jobs - 1 - i * (result.size);
                 var low_bound = high_bound - result.size + 1;
-                var pagination = $('<span title="' + low_bound + '-' + high_bound + '"class="btn btn-xs btn-default" id="p' + (i + 1) +
+                var pagination = $('<span title="' + Math.max(low_bound, 0) + '-' + high_bound + '"class="btn btn-xs btn-default" id="p' + (i + 1) +
                     '" style="margin: 0 2px;">' + (i + 1) + '</span>')
                 that.element.find('#pagination').append(pagination);
                 that.element.find('#p' + (that.page)).addClass('active disabled').css('pointer-events', 'none');
@@ -149,6 +189,41 @@ define([
                 }
                 row.find('.splitterbadge').text(jobdata.splitter);
                 row.find('.subjobcount').text(jobdata.subjobs);
+
+                row.find('#open-this-notebook').addClass('open'+id);                
+                row.find('#remove-this-job').addClass('remove'+id);                
+                row.find('#open-this-notebook').click(function() {
+                    // var onbutton = $('<a></a>');
+                    // onbutton.addClass("btn btn-xs btn-default nblocation");
+                    // onbutton.attr("target", "_blank");
+                    // onbutton.text("Open Notebook")               
+
+                    // row.find('.subjobinfo').append(onbutton);
+                    window.open(jobdata.nblocation ,'_blank');
+                });
+                row.find('#remove-this-job').click(function() {
+                    var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
+                    var endpoint = list_endpoint + '?remove=yes&jobid=' + id;
+                    // console.log(endpoint)  
+                    row.hide();              
+                    $.getJSON(endpoint, function(result) {
+                        console.log(result);
+                        if (result.id == id && result.remove == 'true') {
+                            row.remove()
+                        }
+                        else {
+                            row.show();
+                            dialog.modal({
+                                title: 'Failed',
+                                body: 'Removing Job ' + id +' failed.',
+                                buttons: {
+                                    Okay : {}
+                                }
+                            });
+                        }
+                    });
+                });
+                
                 if (jobdata.subjobs > 0) {
                     $.each(jobdata.subjob_status, function (subjob_id, subjobdata) {
                         var subjobrow = $('<div class="subjobrow">\
@@ -281,8 +356,74 @@ define([
                     }
                 }
             );
-        }
+            this.element.find('#button-select-all').click(function (e) {
+                console.log(e);
+                // toggle checkbox if the click doesn't come from the checkbox already
+                if (!$(e.target).is('input[type=checkbox]')) {
+                    if (select_all.prop('checked') || select_all.data('indeterminate')) {
+                        checkboxes.filter(':visible').prop('checked', false);
+                        that.resetElement();
+                    }
+                    else {
+                        that.element.find('.job_toolbar_info').hide();
+                        that.element.find('.dynamic_job_button button').show();
+                        that.element.find('#job-cancel').hide();
+                        that.element.find('#open-notebook').hide();
+                        checkboxes.filter(':visible').prop('checked', true);
+                        that.element.find('#counter-select-jobs').text(that.currentRows);
+                        that.element.find('#select-jobs').prop('indeterminate', false);
+                        that.element.find('#select-jobs').prop('checked', true);
+                    }
+                }
+            });
 
+            var that = this;
+            this.element.find('#open-notebook').click(function () {
+                for (var i = 0; i < checkbox_count; i++) {
+                    if (checkboxes[i].checked) {
+                        var id = $(checkboxes[i]).parent().next().text();
+                        // console.log()
+                        that.element.find('.open'+id).click();
+                    }
+                }
+            });
+            this.element.find('#job-remove').unbind('click').click(function () {
+                var checked_count = 0;
+                for (var i = 0; i < checkbox_count; i++) {
+                    if (checkboxes[i].checked) {
+                        checked_count++;
+                    }
+                }
+                console.log('clicked');
+                dialog.modal({
+                    title: 'Remove Jobs',
+                    body: 'Are you sure you want to remove ' + checked_count +' job(s)?',
+                    buttons: {
+                        Remove : {
+                            class: "btn-danger",
+                            click: function() {
+                                for (var i = 0; i < checkbox_count; i++) {
+                                    if (checkboxes[i].checked) {
+                                        $(checkboxes[i]).prop('checked', false);
+                                        var id = $(checkboxes[i]).parent().next().text();
+                                        that.element.find('.remove'+id).click();                                                                     
+                                    }
+                                }
+                                checkboxes.filter(':visible').prop('checked', false);  
+                                that.resetElement();                                                              
+                            }
+                        },
+                        Cancel : {}
+                    }
+                });
+                // for (var i = 0; i < checkbox_count; i++) {
+                //     if (checkboxes[i].checked) {
+                //         console.log(i);
+                //     }
+                // }
+            });
+        }
+        
         /**
          * Reset element to original state.
          */
