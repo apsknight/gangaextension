@@ -62,7 +62,7 @@ class Ganga(Magics):
 
         # else:
             # logger.info("Magic Cell Execution starts")
-        monitor.send({"msgtype": "magic_execution_start"})
+        #monitor.send({"msgtype": "magic_execution_start"})
         code = ""
         if cell is None:
             code = line
