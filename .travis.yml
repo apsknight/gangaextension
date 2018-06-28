@@ -1,0 +1,46 @@
+# Set up notification options
+notifications: 
+  email:
+    recipients:
+      - amanprtpsingh@gmail.com
+
+    # change is when the repo status goes from pass to fail or vice versa
+    on_success: change
+    on_failure: always
+
+# specify language
+language: python
+
+sudo: enabled
+
+# specify language options
+python:
+  - '2.7'
+
+# configure which branches to run
+branches:
+  # whitelist
+  only:
+    - master
+    - dev
+
+## begin build steps
+####################
+
+before_install:
+  - sudo apt-get update -qq
+  - python -m pip install jupyter
+  - python -m pip install ganga
+  - python -m pip install ipython --upgrade
+  - ipython profile create
+  - cp -r test/ $(ipython locate)/extensions/
+  - mv $(ipython locate)/extensions/test $(ipython locate)/extensions/extension
+  - ls $(ipython locate)/extensions/extension/
+
+install:
+  - echo "c.InteractiveShellApp.extensions.append('extension')" >> $(ipython profile locate default)/ipython_kernel_config.py
+  - jupyter nbextension install extension/frontend --user
+  - jupyter nbextension enable frontend/extension --user
+
+script:
+  - jupyter-nbconvert --to notebook --execute --ExecutePreprocessor.timeout=1000 notebooks/help_robinson.ipynb

@@ -62,7 +62,7 @@ class Ganga(Magics):
 
         # else:
             # logger.info("Magic Cell Execution starts")
-        monitor.send({"msgtype": "magic_execution_start"})
+        #monitor.send({"msgtype": "magic_execution_start"})
         code = ""
         if cell is None:
             code = line
@@ -72,7 +72,11 @@ class Ganga(Magics):
         # logger.info("Sending Code to Ganga from kernel")
         # Start execution
         current_ns = pickle_dumps(self._pickle_ns())
-        monitor.run(code, (current_ns))
+        op = monitor.run(code, (current_ns))
+        if op[0].stderr:
+            print(op[0].stderr)
+        if op[0].stdout:
+            print(op[0].stdout)
 
 # Default ipython entrypoint for kernel extension.
 def load_ipython_extension(ipython):
@@ -90,7 +94,7 @@ def load_ipython_extension(ipython):
     # logger.addHandler(fh) ## Comment this line to disable logging to a file.
     global monitor
     monitor = GangaMonitor(ipython)
-    monitor.register_comm()
+    # monitor.register_comm()
     # logger.info("Registering Ganga Magic in kernel.")
     ipython.register_magics(Ganga)
     # logger.info("Done Done")
