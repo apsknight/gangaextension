@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/apsknight/gangaextension.svg?branch=master)](https://travis-ci.com/apsknight/gangaextension)
+
 # Ganga Jupyter Extension
 > A Jupyter Extension for submitting Ganga Jobs inside Notebook.
 
