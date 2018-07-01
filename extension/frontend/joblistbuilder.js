@@ -115,8 +115,8 @@ define([
          */
         getJobs.prototype.changeSize = function (size, list_endpoint) {
             this.size = size;
-            this.endpoint = list_endpoint + '?size=' + this.size;            
-            console.log('csize');
+            this.endpoint = list_endpoint + '?size=' + this.size;
+            // console.log('csize');
         }
 
         /**
@@ -124,12 +124,20 @@ define([
          * @param {string} endpoint 
          */
         getJobs.prototype.getData = function (endpoint) {
-            console.log(endpoint);
+            // console.log(endpoint);
             var that = this;
             this.element.find('#overlay').css('display', 'block');
-            $.getJSON(endpoint, function (result) {
-                that.element.find('#overlay').css('display', 'none');
-                that.buildList(result);
+            $.ajax({
+                url: endpoint,
+                dataType: 'json',
+                success: function (result) {
+                    that.element.find('#overlay').css('display', 'none');
+                    that.buildList(result);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    that.element.find('#overlay').css('display', 'none');
+                },
+                timeout: 3000
             });
         }
         /**
@@ -158,7 +166,7 @@ define([
                     var page_no = $(this).attr('id').split('p')[1]
                     var endpoint_query = '?size=' + that.size + '&start=' + (result.start - (page_no - that.page) * that.size)
                     var new_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist' + endpoint_query);
-                    console.log(new_endpoint);
+                    // console.log(new_endpoint);
                     that.page = page_no;
                     that.endpoint = new_endpoint;
                     that.getData(new_endpoint);
@@ -190,24 +198,24 @@ define([
                 row.find('.splitterbadge').text(jobdata.splitter);
                 row.find('.subjobcount').text(jobdata.subjobs);
 
-                row.find('#open-this-notebook').addClass('open'+id);                
-                row.find('#remove-this-job').addClass('remove'+id);                
-                row.find('#open-this-notebook').click(function() {
+                row.find('#open-this-notebook').addClass('open' + id);
+                row.find('#remove-this-job').addClass('remove' + id);
+                row.find('#open-this-notebook').click(function () {
                     // var onbutton = $('<a></a>');
                     // onbutton.addClass("btn btn-xs btn-default nblocation");
                     // onbutton.attr("target", "_blank");
                     // onbutton.text("Open Notebook")               
 
                     // row.find('.subjobinfo').append(onbutton);
-                    window.open(jobdata.nblocation ,'_blank');
+                    window.open(jobdata.nblocation, '_blank');
                 });
-                row.find('#remove-this-job').click(function() {
+                row.find('#remove-this-job').click(function () {
                     var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
                     var endpoint = list_endpoint + '?remove=yes&jobid=' + id;
                     // console.log(endpoint)  
-                    row.hide();              
-                    $.getJSON(endpoint, function(result) {
-                        console.log(result);
+                    row.hide();
+                    $.getJSON(endpoint, function (result) {
+                        // console.log(result);
                         if (result.id == id && result.remove == 'true') {
                             row.remove()
                         }
@@ -215,15 +223,15 @@ define([
                             row.show();
                             dialog.modal({
                                 title: 'Failed',
-                                body: 'Removing Job ' + id +' failed.',
+                                body: 'Removing Job ' + id + ' failed.',
                                 buttons: {
-                                    Okay : {}
+                                    Okay: {}
                                 }
                             });
                         }
                     });
                 });
-                
+
                 if (jobdata.subjobs > 0) {
                     $.each(jobdata.subjob_status, function (subjob_id, subjobdata) {
                         var subjobrow = $('<div class="subjobrow">\
@@ -281,7 +289,7 @@ define([
                     $(this).find('.tdstageicon').removeClass('tdstageiconcollapsed');
                     var status = $(this).find('.thstatus').text().toLowerCase();
                     that.resetElement();
-                    console.log(status);
+                    // console.log(status);
                     if (status != 'completed' && status != 'killed' && status != 'failed') {
                         $(this).hide();
                         that.currentRows--;
@@ -357,7 +365,7 @@ define([
                 }
             );
             this.element.find('#button-select-all').click(function (e) {
-                console.log(e);
+                // console.log(e);
                 // toggle checkbox if the click doesn't come from the checkbox already
                 if (!$(e.target).is('input[type=checkbox]')) {
                     if (select_all.prop('checked') || select_all.data('indeterminate')) {
@@ -383,7 +391,7 @@ define([
                     if (checkboxes[i].checked) {
                         var id = $(checkboxes[i]).parent().next().text();
                         // console.log()
-                        that.element.find('.open'+id).click();
+                        that.element.find('.open' + id).click();
                     }
                 }
             });
@@ -394,26 +402,26 @@ define([
                         checked_count++;
                     }
                 }
-                console.log('clicked');
+                // console.log('clicked');
                 dialog.modal({
                     title: 'Remove Jobs',
-                    body: 'Are you sure you want to remove ' + checked_count +' job(s)?',
+                    body: 'Are you sure you want to remove ' + checked_count + ' job(s)?',
                     buttons: {
-                        Remove : {
+                        Remove: {
                             class: "btn-danger",
-                            click: function() {
+                            click: function () {
                                 for (var i = 0; i < checkbox_count; i++) {
                                     if (checkboxes[i].checked) {
                                         $(checkboxes[i]).prop('checked', false);
                                         var id = $(checkboxes[i]).parent().next().text();
-                                        that.element.find('.remove'+id).click();                                                                     
+                                        that.element.find('.remove' + id).click();
                                     }
                                 }
-                                checkboxes.filter(':visible').prop('checked', false);  
-                                that.resetElement();                                                              
+                                checkboxes.filter(':visible').prop('checked', false);
+                                that.resetElement();
                             }
                         },
-                        Cancel : {}
+                        Cancel: {}
                     }
                 });
                 // for (var i = 0; i < checkbox_count; i++) {
@@ -423,7 +431,7 @@ define([
                 // }
             });
         }
-        
+
         /**
          * Reset element to original state.
          */
