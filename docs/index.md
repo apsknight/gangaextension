@@ -1,7 +1,6 @@
 **[Final Report](index.md)** |
 **[Installation](install.md)** |
 **[How it Works](how.md)** |
-<!-- **[Use Cases](usecases.md)** | -->
 **[Code](https://github.com/apsknight/gangaextension)**
 
 # Google Summer of Code 2018
@@ -13,7 +12,6 @@
 - [Mentors](#mentors)
 - [Introduction](#introduction)
 - [Features](#features)
-<!-- - [Use Cases](#use-cases) -->
 - [Documentation](#documentation)
 - [Gallery](#gallery)
 - [Future Work](#future-work)
