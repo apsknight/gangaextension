@@ -2,14 +2,14 @@ from notebook.base.handlers import IPythonHandler
 from importlib import import_module
 import sys
 
-class GangaArchiveHandler(IPythonHandler):
-    def prepare(self):
-        if sys.version_info >= (3, 0):
-            import ganga
-        else:
-            import ganga.ganga
-        ganga.runMonitoring()
+if sys.version_info >= (3, 0):
+    import ganga
+else:
+    import ganga.ganga
+ganga.runMonitoring()
 
+class GangaArchiveHandler(IPythonHandler):
+     
     def get(self):       
 
         try:
