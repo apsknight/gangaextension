@@ -5,10 +5,10 @@ import sys
 class GangaArchiveHandler(IPythonHandler):
     def prepare(self):
         if sys.version_info >= (3, 0):
-            self.ganga = import_module("ganga")
+            import ganga
         else:
-            self.ganga = import_module("ganga.ganga")
-        self.ganga.runMonitoring()
+            import ganga.ganga
+        ganga.runMonitoring()
 
     def get(self):       
 
@@ -16,19 +16,19 @@ class GangaArchiveHandler(IPythonHandler):
             size = int(self.get_argument('size', 20))
             jobid = int(self.get_argument('jobid', -1))
             remove = True if self.get_argument('remove', None) else False            
-            total_jobs = len(self.ganga.jobs)
-            start = int(self.get_argument('start', self.ganga.jobs[-1].id))
+            total_jobs = len(ganga.jobs)
+            start = int(self.get_argument('start', ganga.jobs[-1].id))
             endpoints = ["completed", "killed", "failed"]
             result = {}
 
             if jobid is not -1:
                 if remove:
-                    job = self.ganga.jobs[jobid]
+                    job = ganga.jobs[jobid]
                     job.remove()
                     result['id'] = jobid
                     result['remove'] = "true"                    
                 else:
-                    job = self.ganga.jobs[jobid]
+                    job = ganga.jobs[jobid]
 
                     result = {
                     "msgtype": "jobstatus",
@@ -52,7 +52,7 @@ class GangaArchiveHandler(IPythonHandler):
                 print(range(start, max(start-size, 0), -1))
                 for i in range(start, max(start-size, 0), -1):
                     try:
-                        job = self.ganga.jobs[i]
+                        job = ganga.jobs[i]
                     except:
                         continue
                     result["data"][str(job.id)] = {}
