@@ -8,17 +8,6 @@
 # [Large-scale computing backend for Jupyter notebooks](https://summerofcode.withgoogle.com/projects/#6368971138269184)
 > This project is co-mentored by [CERN-HSF](http://hepsoftwarefoundation.org) and [Imerial College, London](https://imperial.ac.uk) for [Google Summer of Code 2018](https://summerofcode.withgoogle.com/).
 
-<table>
-<tr>
-<td><a href="https://summerofcode.withgoogle.com/projects/#6368971138269184"><img src="https://user-images.githubusercontent.com/6822941/29750351-e95e7b1c-8b5b-11e7-9f6b-b25b69f7353a.png" height="100"/></td>
-<td><a href="http://hepsoftwarefoundation.org/"><img src="https://user-images.githubusercontent.com/6822941/29750350-e956b512-8b5b-11e7-9e34-4e3a5be9d37f.png" height="100"/></td>
-
-<td><a href="https://ganga.web.cern.ch/ganga/"><img src="https://avatars0.githubusercontent.com/u/13271048?s=200&v=4" height="100"/></td>
-
-
-</tr>
-</table>
-
 ## Index
 - [Mentors](#mentors)
 - [Introduction](#introduction)
