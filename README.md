@@ -1,28 +1,41 @@
 [![Build Status](https://travis-ci.com/apsknight/gangaextension.svg?branch=master)](https://travis-ci.com/apsknight/gangaextension)
 
-# Ganga Jupyter Extension
-> A Jupyter Extension for submitting Ganga Jobs inside Notebook.
+**[Final Report](docs/index.md)** |
+**[Installation](docs/install.md)** |
+**[How it Works](docs/how.md)** |
+**[Code](https://github.com/apsknight/gangaextension)**
 
-## About
-[Ganga](https://ganga.web.cern.ch/ganga/) is a toolkit to make it easy to run data analysis jobs along with managing associated data files. It provide divide to split jobs into subjobs and submit them to different backends. Ganga intergace is available as [IPython](https://ipython.org/) shell and Python API. This project provides an interface for submitting jobs inside Notebooks.
+# Google Summer of Code 2018
 
-***
-Submitting Job:
-![submitjob](https://image.ibb.co/j1B8Xo/submit_job.gif)
+# [Large-scale computing backend for Jupyter notebooks](https://summerofcode.withgoogle.com/projects/#6368971138269184)
+> This project is co-mentored by [CERN-HSF](http://hepsoftwarefoundation.org) and [Imerial College, London](https://imperial.ac.uk) for [Google Summer of Code 2018](https://summerofcode.withgoogle.com/).
 
-Killing Job:
-![cancel_job](https://user-images.githubusercontent.com/19551774/42093416-de4dc32c-7bc9-11e8-8d90-570fec8bb7dc.gif)
+<table>
+<tr>
+<td><a href="https://summerofcode.withgoogle.com/projects/#6368971138269184"><img src="https://user-images.githubusercontent.com/6822941/29750351-e95e7b1c-8b5b-11e7-9f6b-b25b69f7353a.png" height="100"/></td>
+<td><a href="http://hepsoftwarefoundation.org/"><img src="https://user-images.githubusercontent.com/6822941/29750350-e956b512-8b5b-11e7-9e34-4e3a5be9d37f.png" height="100"/></td>
 
-Resubmitting Job:
+<td><a href="https://ganga.web.cern.ch/ganga/"><img src="https://ganga.web.cern.ch/ganga/images/GangaLogo.png" height="100"/></td>
+
+
+</tr>
+</table>
+
+## Features
+- Ganga Cell Magic for creating new Ganga Jobs.
+- Frontend widget to show Job information and status.
+- Ganga Tab to show information and status of all Ganga Jobs.
+
+## Gallery
+### Submitting Jobs
+
+![submitting](https://camo.githubusercontent.com/25e2ec534a4f8e03424e8009cf6d429da809c158/68747470733a2f2f696d6167652e6962622e636f2f6a314238586f2f7375626d69745f6a6f622e676966)
+
+### Killing Jobs
+![killing](https://user-images.githubusercontent.com/19551774/42093416-de4dc32c-7bc9-11e8-8d90-570fec8bb7dc.gif)
+
+### Resubmitting Failed Jobs
 ![resubmit](https://user-images.githubusercontent.com/19551774/42093468-09e32a40-7bca-11e8-850f-3b73d13ff2fb.gif)
 
-Ganga Tree Tab:
+### Ganga tree tab
 ![treetab](https://user-images.githubusercontent.com/19551774/42093699-ddd4c6ba-7bca-11e8-8212-2e05fb9ee7ce.gif)
-
-
-## Installation
-This project is under development. For a quick test, run following command.
-
-```bash
-docker run -it --rm -p 8888:8888 apsknight/gangaextension
-```
