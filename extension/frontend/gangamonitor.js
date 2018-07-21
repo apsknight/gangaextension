@@ -33,7 +33,18 @@ define([
         this.location = utils.url_path_join(base_url, 'notebooks',
                     utils.encode_uri_components(path));
         // Fix Kernel interruption/restarting
-        // events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
+        events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
+        events.on("kernel_ready.Kernel", () => {
+            var cells = IPython.notebook.get_cells();
+            cells.forEach(cell => {
+                if ("gangajob" in cell.metadata) {
+                    // console.log(cell);
+                    console.log('Asking')
+                    this.cell = cell;
+                    this.ask_job_info(cell.metadata.gangajob, cell.cell_id)
+                }
+            });
+        });
     }
 
     /**
@@ -65,7 +76,7 @@ define([
      * @param {object} msg - JSON recieve message object.
      */
     GangaMonitor.prototype.comm_msg = function (msg) {
-        console.log('GangaMonitor: Recieved message!');
+        console.log('GangaMonitor: Recieved message!', msg);
         this.handle_message(msg);
     }
 
@@ -128,6 +139,15 @@ define([
             console.error('GangaMonitor: Job Started with no running cell');
             return;
         }
+        // Start Monitoring as Job will be in submitted state
+        var endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist?monitor=True');
+        $.ajax({
+            url: endpoint,
+            timeout: 10000
+        });
+        this.cell.metadata.gangajob = data.id
+        this.cell.toJSON()
+        console.log(this.cell)
         var dismonitor = new displaymonitor.DisplayMonitor(this, cell, data);
         this.displaymonitor[data.id] = dismonitor;
         this.send({'msgtype': 'nblocation', 'id': data.id, 'nblocation': this.location});
@@ -140,6 +160,14 @@ define([
      */
     GangaMonitor.prototype.job_status_recieved = function (data) {
         this.displaymonitor[data.id].updateContent(data);
+    }
+
+    /**
+     * Ask for Job Info from Kernel
+     * @param {var} id - Job ID.
+     */
+    GangaMonitor.prototype.ask_job_info = function (jobid, cellid) {
+        this.send({'msgtype': 'askinfo', 'id': jobid, 'cell': cellid});
     }
 
     return {

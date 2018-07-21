@@ -137,7 +137,7 @@ define([
                 error: function (jqXHR, textStatus, errorThrown) {
                     that.element.find('#overlay').css('display', 'none');
                 },
-                timeout: 3000
+                timeout: 20000
             });
         }
         /**

@@ -1,0 +1,39 @@
+{% set menu = True %}
+{% set tree = True %}
+{% set projects_root = (projects_page and breadcrumbs|length == 1) %}
+{% extends "page.html" %}
+
+{% block title %}{{page_title}}{% endblock %}
+
+
+{% block params %}
+{{super()}}
+data-base-url="{{base_url | urlencode}}"
+data-notebook-path="{{notebook_path | urlencode}}"
+data-terminals-available="{{terminals_available}}"
+data-server-root="{{server_root}}"
+{% endblock %}
+
+{% block headercontainer %}
+<span class="flex-spacer"></span>
+{% endblock %}
+
+{% block site %}
+
+  <div id="ipython-main-app" class="container">
+        <!-- Tree -->
+    <div class="tab-content">
+      
+    </div>
+  </div>
+
+
+
+{% endblock %}
+
+{% block script %}
+    {{super()}}
+
+
+<script src="{{ static_url("tree/js/main.min.js") }}" type="text/javascript" charset="utf-8"></script>
+{% endblock %}

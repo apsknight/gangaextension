@@ -10,14 +10,25 @@ ganga.runMonitoring()
 
 class GangaArchiveHandler(IPythonHandler):
      
-    def get(self):       
-
+    def get(self):
+        """Qyery Arguments
+        monitor: Run Monitoring only.
+        size: Return this many jobs (default is 20).
+        jobid: Query for this jobid
+        remove: Remove Job with id jobid (Also need jobid argument for this.)
+        start: Starting point for returning info. (Return job info from start to start-size)
+        """ 
+        monitor = True if self.get_argument('monitor', None) else False
+        size = int(self.get_argument('size', 20))
+        jobid = int(self.get_argument('jobid', -1))
+        remove = True if self.get_argument('remove', None) else False            
+        start = int(self.get_argument('start', ganga.jobs[-1].id))
+        ganga.runMonitoring()
+        
         try:
-            size = int(self.get_argument('size', 20))
-            jobid = int(self.get_argument('jobid', -1))
-            remove = True if self.get_argument('remove', None) else False            
+            if monitor:
+                return
             total_jobs = len(ganga.jobs)
-            start = int(self.get_argument('start', ganga.jobs[-1].id))
             endpoints = ["completed", "killed", "failed"]
             result = {}
 
@@ -49,7 +60,6 @@ class GangaArchiveHandler(IPythonHandler):
             
             else:
                 result = {"data": {}, "start": start, "size": size, "total_jobs": total_jobs}   
-                print(range(start, max(start-size, 0), -1))
                 for i in range(start, max(start-size, 0), -1):
                     try:
                         job = ganga.jobs[i]
@@ -91,8 +101,3 @@ class GangaArchiveHandler(IPythonHandler):
         except Exception as e:
             exc_type, exc_obj, exc_tb  = sys.exc_info()
             print("GangaArchive: ", e, exc_type, exc_tb.tb_lineno)
-        
-    def on_finish(self):
-        '''
-        Currently does nothing. Can be used for de-importing Ganga.
-        '''

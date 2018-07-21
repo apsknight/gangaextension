@@ -23,6 +23,9 @@ define([
      * @param {string} time 
      */
     function format_time(time) {
+        if (!time) {
+            return '-'
+        }
         var timeArray = time.toString().split(':');
         var timeString = '';
         if (timeArray[0] > 0) {

@@ -4,17 +4,17 @@ from IPython.utils.io import capture_output
 import time
 from threading import Thread
 
-# Import Ganga
-ganga_imported = False
-with capture_output() as ganga_import_output:
-    try:
-        import ganga.ganga
-        ganga_imported = True
-    except ImportError as e:
-        print("GangaMonitor: Unable to import Ganga in Python \n %s \n" % str(e))
+# # Import Ganga
+# ganga_imported = False
+# with capture_output() as ganga_import_output:
+#     try:
+#         import ganga.ganga
+#         ganga_imported = True
+#     except ImportError as e:
+#         print("GangaMonitor: Unable to import Ganga in Python \n %s \n" % str(e))
 
-if ganga_imported:
-    print("GangaMonitor: Ganga Imported succesfully")
+# if ganga_imported:
+#     print("GangaMonitor: Ganga Imported succesfully")
 
 class GangaMonitor:
     """
@@ -29,27 +29,32 @@ class GangaMonitor:
         print("Message recieved from frontend: \n %s \n" % str(msg))
 
         data = msg["content"]["data"]
-
         if data["msgtype"] == "nblocation":
-            ganga.jobs[int(data["id"])].comment = str(data['nblocation'])
+            jobid = int(data["id"])
+            location = str(data["nblocation"])
+            self.ipython.run_code("ganga.jobs[%s].comment = %s" % (jobid, location))
 
+        if data["msgtype"] == "askinfo":
+            self.send_job_info(int(data["id"]), data["cell"])
+            job_obj = self.extract_job_obj
         # If cancellation is requested, kill the job.
         if data["msgtype"] == "cancel":
-            ganga.jobs[int(data["id"])].kill()
+            jobid = int(data["id"])
+            self.ipython.run_code("ganga.jobs[%s].kill()" % jobid)
         
         # If resubmission is requested, resubmit job and start monitoring thread.
-        if data["msgtype"] == "resubmit":
-            id = int(data["id"])
-            job_obj = ganga.jobs[id]
-            if len(job_obj.subjobs) == 0 and str(job_obj.status) == "failed":
-                job_obj.resubmit()
-            else:
-                for sj in job_obj.subjobs:
-                    if str(sj.status) == "failed":
-                        sj.resubmit()
-            self.job_obj = job_obj
-            self.send_job_info()
-            self.send_job_status()
+        # if data["msgtype"] == "resubmit":
+        #     id = int(data["id"])
+        #     job_obj = ganga.jobs[id]
+        #     if len(job_obj.subjobs) == 0 and str(job_obj.status) == "failed":
+        #         job_obj.resubmit()
+        #     else:
+        #         for sj in job_obj.subjobs:
+        #             if str(sj.status) == "failed":
+        #                 sj.resubmit()
+        #     self.job_obj = job_obj
+        #     self.send_job_info()
+        #     self.send_job_status()
 
         # If cellinfo is recieved, store it.
         if data["msgtype"] == "cellinfo":
@@ -98,19 +103,20 @@ class GangaMonitor:
 
         return str(obj_name)
 
-    def send_job_info(self):
+    def send_job_info(self, id, cell_id):
         """
         Send informtion related to Job to frontend.
         """
+        self.ipython.run_code('job_obj = ganga.jobs[%s]' % id)
         job_obj = self.ipython.user_ns['job_obj']
         job_info = {
                 "msgtype": "jobinfo",
                 "id": job_obj.id,
-                "cell_id": self.cell,
+                "cell_id": cell_id,
                 "name": str(job_obj.name),
                 "backend": str(job_obj.backend.__class__.__name__),
                 "subjobs": len(job_obj.subjobs),
-                "status": "submitted",
+                "status": job_obj.status,
                 "job_submission_time": str(job_obj.time.submitting())[:19],
                 "application": str(job_obj.application).split()[0],
                 "splitter": str(job_obj.splitter).split()[0],            
@@ -122,24 +128,27 @@ class GangaMonitor:
             
         self.send(job_info)
 
-    def send_job_status(self):
+    def send_job_status(self, id, cell_id):
         """
         Send status of job to frontend
         """
+        self.ipython.run_code('job_obj = ganga.jobs[%s]' % id)
         job_obj = self.ipython.user_ns['job_obj']
         endpoints = ["completed", "killed", "failed"]
         while True:
-            self.ipython.run_code('ganga.runMonitoring()')
+            self.ipython.run_code('job_obj = ganga.jobs[%s]' % id)
+            # self.ipython.run_code('ganga.runMonitoring()')
+            self.ipython.run_code('ganga.reloadJob(%s)' % id)
             job_obj = self.ipython.user_ns['job_obj']
             job_status = {
                 "msgtype": "jobstatus",
                 "id": job_obj.id,
-                "cell_id": self.cell,
+                "cell_id": cell_id,
                 "status": str(job_obj.status),
             }
             if (job_status["status"] is "completed"):
                 job_status.update({"runtime": str(job_obj.time.runtime())})
-            if len(job_obj.subjobs) > 0:
+            if len(job_obj.subjobs) > 0 and job_status["status"] in endpoints:
                 job_status.update({"subjob_status": {}})
                 job_status.update({"subjob_runtime": {}})
                 for sj in job_obj.subjobs:
@@ -160,13 +169,14 @@ class GangaMonitor:
         try:
             with capture_output() as ganga_job_output:
                 self.ipython.run_code(raw_cell)
-                self.ipython.run_code('ganga.runMonitoring()')
+                # self.ipython.run_code('ganga.runMonitoring()')
         except Exception as e:
             print("GangaMonitor: %s" % str(e))
         else:
             self.ipython.run_code(mirror_code)
-            self.send_job_info()
+            jobid = self.ipython.user_ns[job_obj_name].id
+            self.send_job_info(jobid, self.cell)
             # Start new thread for sending status
-            status_thread = Thread(target=self.send_job_status, args=())
+            status_thread = Thread(target=self.send_job_status, args=(jobid, self.cell))
             status_thread.start()
             return [ganga_job_output]
