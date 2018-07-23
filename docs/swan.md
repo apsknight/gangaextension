@@ -50,7 +50,7 @@ git clone https://github.com/apsknight/gangaextension.git
     }
     ```
 
-- Enable tree section frontend extensions by modifying `/ramdisk/extra_libs/etc_jupyter/nbconfig/notebook.json` to
+- Enable tree section frontend extensions by modifying `/ramdisk/extra_libs/etc_jupyter/nbconfig/tree.json` to
     ```json
     {
     "load_extensions": {
