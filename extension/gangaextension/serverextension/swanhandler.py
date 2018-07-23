@@ -2,7 +2,7 @@ from notebook.base.handlers import IPythonHandler
 
 class SwanHandler(IPythonHandler):
     def get(self):
-        self.write(self.render_template('tree.html',
+        self.write(self.render_template('gangapage.html',
                                         page_title='Ganga Jobs',
                                         notebook_path='gangajobs',
                                         terminals_available=self.settings['terminals_available'],
