@@ -89,7 +89,7 @@ define([
                 element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
                 obj.getData(obj.endpoint);
             });
-
+            setInterval( function() { obj.getData(obj.endpoint, false); }, 22000 );
             return element;
         }
 
@@ -123,14 +123,18 @@ define([
          * Function for making asynchronous AJAX request to Ganga Server Extension
          * @param {string} endpoint 
          */
-        getJobs.prototype.getData = function (endpoint) {
-            // console.log(endpoint);
+        getJobs.prototype.getData = function (endpoint, overlay=true) {
             var that = this;
-            this.element.find('#overlay').css('display', 'block');
+            if (overlay) {
+                this.element.find('#overlay').css('display', 'block');
+            }
             $.ajax({
                 url: endpoint,
                 dataType: 'json',
                 success: function (result) {
+                    that.element.find('tbody').empty();
+                    that.element.find('#pagination').empty();
+                    that.element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
                     that.element.find('#overlay').css('display', 'none');
                     that.buildList(result);
                 },

@@ -139,12 +139,6 @@ define([
             console.error('GangaMonitor: Job Started with no running cell');
             return;
         }
-        // Start Monitoring as Job will be in submitted state
-        var endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist?monitor=True');
-        $.ajax({
-            url: endpoint,
-            timeout: 10000
-        });
         this.cell.metadata.gangajob = data.id
         this.cell.toJSON()
         console.log(this.cell)
