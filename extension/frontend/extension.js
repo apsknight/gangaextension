@@ -6,6 +6,7 @@
  */
 
 define([
+	'base/js/namespace',
 	'./gangamonitor',
 	'./cellqueue',
 	'./load_file',
@@ -13,6 +14,7 @@ define([
 	'jquery'
 
 ], function(
+	Jupyter,
 	GangaMonitor,
 	CurrentCell,
 	load_file,
@@ -57,18 +59,18 @@ define([
 	 * Entrypoint function : Jupyter automatically detects and call this function.
 	 */
 	function load_ipython_extension() {
-		console.log('GangaMonitor: Loading GangaMonitor frontend extension');
-		console.log('Loading Ganga Tab Extension')
-		if($(".tab-content").length != 0) {
-			// This is Tree Tab
-			insert_tab();
-		}
-		else {
-			// This is Notebook
+		if (Jupyter.notebook != null) {
+			// This is notebook
+			console.log('GangaMonitor: Loading GangaMonitor frontend extension');
 			load_file.load_css('./static/style.css');
 			var monitor = new GangaMonitor.GangaMonitor();
 			window.ganga_monitor = monitor;
 			CurrentCell.register();
+		}
+		else {
+			// This is tree
+			console.log('Loading Ganga Tab Extension')
+			insert_tab();
 		}
 	}
 
