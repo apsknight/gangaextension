@@ -58,7 +58,7 @@ git clone https://github.com/apsknight/gangaextension.git
         "swannotifications/extension": true,
         "swanshare/extension": true,
         "swanintro/extension": true,
-        "gangaextension/gangatreetab": true
+        "gangaextension/extension": true
         }
     }
 
