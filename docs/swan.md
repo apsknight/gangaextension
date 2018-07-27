@@ -74,9 +74,19 @@ git clone https://github.com/apsknight/gangaextension.git
     cp -f gangaextension/extension/gangaextension/serverextension/gangapage.html /ramdisk/extra_libs/templates
     ```
 
-- In the docker image that spawns SWAN.
-    + Install [this branch](https://github.com/apsknight/ganga/tree/job_sharing) (job_sharing) in Py2 environment and [this branch](https://github.com/apsknight/ganga/tree/ganga_python3) (ganga_python3) in Py3 environment.
-    + Update IPython Configuration to load Kernel Extension on startup.
+- In the docker image (`/docker_img_tmp/systemuser/Dockerfile`) that spawns SWAN.
+    + Install [this branch](https://github.com/apsknight/ganga/tree/job_sharing) (job_sharing) in Py2 environment and [this branch](https://github.com/apsknight/ganga/tree/ganga_python3) (ganga_python3) in Py3 environment.  
+       For Py2 include this in Dockerfile:
+       ```Dockerfile
+       RUN mkdir /usr/local/lib/swan_py2 && \
+        pip2 install https://github.com/apsknight/ganga/archive/job_sharing.zip -t /usr/local/lib/swan_py2 --no-deps
+       ```  
+       For Py3 include this in Dockerfile:
+       ```Dockerfile
+       RUN pip3 install https://github.com/apsknight/ganga/archive/ganga_python3.zip
+       ```
+    + Update IPython Configuration to load Kernel Extension on startup.  
+      In the `/docker_img_tmp/systemuser/userconfig.sh` include this line,
     ```bash
-    echo "c.InteractiveShellApp.extensions.append('gangaextension.kernelextension')" >>  $(ipython profile locate default)/ipython_kernel_config.py
+        echo "c.InteractiveShellApp.extensions.append('gangaextension.kernelextension')" >>  $KERNEL_PROFILEPATH
     ```
