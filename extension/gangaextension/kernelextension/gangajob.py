@@ -156,7 +156,7 @@ class GangaMonitor:
         """
         job_obj_name = self.extract_job_obj(raw_cell)
         if not job_obj_name:
-            self.ipython.run_code('print("No Job is defined in Ganga Magic")')
+            self.ipython.run_code('raise Exception("No Ganga Job is defined in cell magic.")')
             return
         try:
             with capture_output() as ganga_job_output:
