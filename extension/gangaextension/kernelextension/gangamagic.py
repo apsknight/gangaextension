@@ -34,10 +34,11 @@ class Ganga(Magics):
         op = monitor.run(code)
 
         # Print stderr and stdout (if any)
-        if op[0].stderr:
-            print(op[0].stderr)
-        if op[0].stdout:
-            print(op[0].stdout)
+        if op is not None:
+            if op[0].stderr:
+                print(op[0].stderr)
+            if op[0].stdout:
+                print(op[0].stdout)
 
 # Default ipython entrypoint for kernel extension.
 def load_ipython_extension(ipython):
