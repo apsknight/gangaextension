@@ -69,12 +69,20 @@ class GangaMonitor:
 
         regex = r"(\w+)\s*=\s*Job\("
         matches = re.finditer(regex, code, re.MULTILINE)
-
+        
         obj_name = ""
+
+        matchCount = 0
         for match in matches:
             obj_name = match.group(1)
+            matchCount = matchCount + 1
         
+        if matchCount > 1:
+            self.ipython.run_code('raise Exception("Only one Ganga Job can be defined in a single cell magic.")')
+            return False
+
         if obj_name == "":
+            self.ipython.run_code('raise Exception("No Ganga Job is defined in cell magic.")')
             return False
 
         return str(obj_name)
@@ -156,7 +164,6 @@ class GangaMonitor:
         """
         job_obj_name = self.extract_job_obj(raw_cell)
         if not job_obj_name:
-            self.ipython.run_code('raise Exception("No Ganga Job is defined in cell magic.")')
             return
         try:
             with capture_output() as ganga_job_output:
