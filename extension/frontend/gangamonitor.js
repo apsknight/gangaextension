@@ -22,11 +22,12 @@ define([
      * @constructor - GangaMonitor object's constructor
      */
     function GangaMonitor() {
-
+        var that = this;
         // Communication object with kernel.
         this.comm = null;
         this.cell = null;
         this.displaymonitor = {}
+        this.cell_id_hash = {}
         this.startComm();
         var base_url = utils.get_body_data("baseUrl");
         var path = utils.get_body_data("notebookPath");
@@ -34,17 +35,14 @@ define([
                     utils.encode_uri_components(path));
         // Fix Kernel interruption/restarting
         events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
-        events.on("kernel_ready.Kernel", () => {
-            var cells = IPython.notebook.get_cells();
-            cells.forEach(cell => {
-                if ("gangajob" in cell.metadata) {
-                    // console.log(cell);
-                    console.log('Asking')
-                    this.cell = cell;
-                    this.ask_job_info(cell.metadata.gangajob, cell.cell_id)
-                }
-            });
-        });
+
+        // Removing display when output area is cleared
+        events.on('clear_output.CodeCell', function (event, data) {
+            var monitor = that.getDisplayMonitor(data.cell.cell_id)
+            if (monitor) {
+                monitor.displayElement.remove();
+            }
+        });    
     }
 
     /**
@@ -127,7 +125,7 @@ define([
                 break;
         }
     }
-
+    
     /**
      * Function for handling Job Info message.
      * Creates a new instance of DisplayMonitor and assigns it to cell.
@@ -139,12 +137,10 @@ define([
             console.error('GangaMonitor: Job Started with no running cell');
             return;
         }
-        this.cell.metadata.gangajob = data.id
-        this.cell.toJSON()
-        console.log(this.cell)
+        this.cell_id_hash[cell.cell_id] = data.id
         var dismonitor = new displaymonitor.DisplayMonitor(this, cell, data);
         this.displaymonitor[data.id] = dismonitor;
-        this.send({'msgtype': 'nblocation', 'id': data.id, 'nblocation': this.location});
+        // this.send({'msgtype': 'nblocation', 'id': data.id, 'nblocation': this.location});
     }
 
     /**
@@ -162,6 +158,11 @@ define([
      */
     GangaMonitor.prototype.ask_job_info = function (jobid, cellid) {
         this.send({'msgtype': 'askinfo', 'id': jobid, 'cell': cellid});
+    }
+
+    GangaMonitor.prototype.getDisplayMonitor = function (cell_id) {
+        var jobid = this.cell_id_hash[cell_id]
+        return this.displaymonitor[jobid];
     }
 
     return {
