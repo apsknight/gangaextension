@@ -1,6 +1,7 @@
 **[Final Report](index.md)** |
 **[Installation](install.md)** |
 **[How it Works](how.md)** |
+**[How to use](use.md)** |
 **[Code](https://github.com/apsknight/gangaextension)**
 
 # Google Summer of Code 2018
