@@ -42,7 +42,50 @@ define([
             if (monitor) {
                 monitor.displayElement.remove();
             }
-        });    
+        });
+
+        this.createButtons();
+    }
+
+    GangaMonitor.prototype.createButtons = function () {
+        var that = this;
+        var toggleHandler = function () {
+            that.toggleAll();
+        };
+        var toggleAction = {
+            icon: 'fa-toggle-on',
+            help: 'Toggle Ganga Monitor Displays',
+            help_index: 'zz',
+            handler: toggleHandler
+        };
+        var togglePrefix = 'GangaMonitor';
+        var toggle_action_name = 'toggle-ganga-monitoring';
+    
+        var toggle_action = Jupyter.actions.register(toggleAction, toggle_action_name, togglePrefix);
+        button = Jupyter.toolbar.add_buttons_group([toggle_action]);
+
+        button.click(function() {
+            button.find('i').toggleClass('fa-toggle-on').toggleClass('fa-toggle-off');
+        })
+
+        var path = utils.url_path_join(utils.get_body_data('baseUrl'), 'swangangalist');
+
+        var openJobsHandler = function () {
+            window.open(path, '_blank');
+        }
+        var openJobsAction = {
+            icon: 'fa-share',
+            help: 'Open Jobs in new tab',
+            help_index: 'zz',
+            handler: openJobsHandler
+        };
+        var openJobsPrefix = 'Jobs';
+        var openJobs_action_name = 'open-jobs';
+
+        var openJobs_action = Jupyter.actions.register(openJobsAction, openJobs_action_name, openJobsPrefix);
+
+        Jupyter.toolbar.add_buttons_group([openJobs_action]);
+
     }
 
     /**
@@ -163,6 +206,17 @@ define([
     GangaMonitor.prototype.getDisplayMonitor = function (cell_id) {
         var jobid = this.cell_id_hash[cell_id]
         return this.displaymonitor[jobid];
+    }
+
+    GangaMonitor.prototype.toggleAll = function () {
+        var cells = Jupyter.notebook.get_cells();
+
+        cells.forEach(cell => {
+            var JobMonitor = cell.element.find('.inner_cell').find('.JobMonitor');
+            if (cell.cell_type == 'code' && JobMonitor.length > 0) {
+                JobMonitor.toggle();
+            }
+        });
     }
 
     return {
