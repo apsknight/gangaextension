@@ -123,10 +123,11 @@ class GangaMonitor:
 
         while True:
             # Run infinite loop until endpoint is reached
-            self.ipython.run_code('reloadJob(%s)' % id)
+            if str(job_obj) == "submitted":
+                self.ipython.run_code('reloadJob(%s)' % id)
             self.ipython.run_code('job_obj = jobs[%s]' % id)
             job_obj = self.ipython.user_ns['job_obj']
-                
+            
             job_status = {
                 "msgtype": "jobstatus",
                 "id": job_obj.id,
@@ -157,8 +158,8 @@ class GangaMonitor:
             if (job_status["status"] in endpoints):
                 break
 
-            # Send Job status to frontend every 8 seconds
-            time.sleep(8)
+            # Send Job status to frontend every 10 seconds
+            time.sleep(10)
 
     def run(self, raw_cell):
         """
