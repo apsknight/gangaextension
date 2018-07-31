@@ -126,11 +126,13 @@ class GangaMonitor:
             self.ipython.run_code('reloadJob(%s)' % id)
             self.ipython.run_code('job_obj = jobs[%s]' % id)
             job_obj = self.ipython.user_ns['job_obj']
+                
             job_status = {
                 "msgtype": "jobstatus",
                 "id": job_obj.id,
                 "cell_id": cell_id,
                 "status": str(job_obj.status),
+                "job_submission_time": str(job_obj.time.submitting())[:19],
             }
 
             if len(job_obj.subjobs) > 0:
@@ -138,25 +140,25 @@ class GangaMonitor:
                 job_status.update({"subjob_runtime": {}})
                 for sj in job_obj.subjobs:
                     job_status["subjob_status"][str(sj.id)] = str(sj.status)
-                    if (str(sj.status) == "completed"):
-                        job_status["subjob_runtime"][str(sj.id)] = str(sj.time.runtime())
+                #     if (str(sj.status) == "completed"):
+                #         job_status["subjob_runtime"][str(sj.id)] = str(sj.time.runtime())
 
             if (job_status["status"] == "completed"):
                 job_status.update({"runtime": str(job_obj.time.runtime())})
                 for sj in job_obj.subjobs:
-                    job_status["subjob_status"][str(sj.id)] = job_obj["status"]
-                    if (str(sj.status) == "completed"):
-                        job_status["subjob_runtime"][str(sj.id)] = str(job_obj.time.runtime())
-
-
-            # Send Job status to frontend every 3 seconds
-            time.sleep(3)
+                    job_status["subjob_status"][str(sj.id)] = job_status["status"]
+                    # if (str(sj.status) == "completed"):
+                    job_status["subjob_runtime"][str(sj.id)] = job_status["runtime"]
 
             self.send(job_status)
+
 
             # If endpoint is reached then break the loop.
             if (job_status["status"] in endpoints):
                 break
+
+            # Send Job status to frontend every 8 seconds
+            time.sleep(8)
 
     def run(self, raw_cell):
         """

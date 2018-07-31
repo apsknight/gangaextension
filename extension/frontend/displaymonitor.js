@@ -51,12 +51,12 @@ define([
         this.cell.element.find('.inner_cell').append(element);
         element.slideToggle();
 
-        // Add callback to Stop Button
-        element.find('.stopbutton').click(function () {
-            console.log('GangaMoniotor: Stop request initiated from displaymonitor');
-            that.cancelJobRequest();
-            that.displayElement.find('.stopbutton').hide();
-        });
+        // Add callback to Stop Button - Removed because Jobs no more run in kernel.
+        // element.find('.stopbutton').click(function () {
+        //     console.log('GangaMoniotor: Stop request initiated from displaymonitor');
+        //     that.cancelJobRequest();
+        //     that.displayElement.find('.stopbutton').hide();
+        // });
 
         // Add callback to close button
         element.find('.closebutton').click(function () {
@@ -194,10 +194,11 @@ define([
             });          
         }
         this.add_data_to_tag('.tdjobstatus', status, 'html');
+        this.add_data_to_tag('.tdjobstart', time.format_date(data.job_submission_time), 'text');
         // Hide stop button if Job is finished
         var endpoints = ["completed", "killed", "failed"];
         if (endpoints.includes(data.status)) {
-            this.displayElement.find('.stopbutton').hide();
+            // this.displayElement.find('.stopbutton').hide();
             this.displayElement.find('.closebutton').show();
             if (data.status == "completed") {
                 this.displayElement.find('.tdjobtime').text(time.format_time(data.runtime));
@@ -232,12 +233,13 @@ define([
 
     /**
      * Function for sending Job Cancellation request to kernel extension.
+     * Removed because Jobs no more run in kernel.
      */
-    DisplayMonitor.prototype.cancelJobRequest = function () {
-        cancelMsg = {'id': this.jobInfoData.id,
-                    'msgtype': 'cancel'};
-        this.monitor.send(cancelMsg);
-    }
+    // DisplayMonitor.prototype.cancelJobRequest = function () {
+    //     cancelMsg = {'id': this.jobInfoData.id,
+    //                 'msgtype': 'cancel'};
+    //     this.monitor.send(cancelMsg);
+    // }
 
     /**
      * Function for sending Job resubmit request to kernel extension.
