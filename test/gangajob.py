@@ -26,6 +26,7 @@ class GangaMonitor:
         self.ipython = ipython
         self.cell = None
         self.ipython.run_code("import ganga.ganga")
+        self.ipython.run_code("from ganga import *")
 
     def extract_job_obj(self, code): # Handle not found error
         regex = r"(\w+)\s*=\s*Job\("
@@ -47,7 +48,7 @@ class GangaMonitor:
         try:
             with capture_output() as ganga_job_output:
                 self.ipython.run_code(raw_cell)
-                self.ipython.run_code('ganga.runMonitoring()')
+                self.ipython.run_code('runMonitoring()')
                 # print("GangaMonitor: Monitoring ON")
         except Exception as e:
             print("GangaMonitor: %s" % str(e))
