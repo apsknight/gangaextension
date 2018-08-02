@@ -109,6 +109,9 @@ tbody tr {
 .jlist .thsubjobtime {
     width: 30%
 }
+.SUBMITTING {
+    background-color: #1a5863; 
+}
 .SUBMITTED {
     background-color: #1b8efa; 
 }
@@ -128,7 +131,7 @@ tbody tr {
 .KILLED {
 	background-color: #616161;
 }
-.SUBMITTED, .COMPLETED, .FAILED, .RUNNING, .NEW, .KILLED {
+.SUBMITTING .SUBMITTED, .COMPLETED, .FAILED, .RUNNING, .NEW, .KILLED {
 	font-size: 85%;
 	padding: 4px 8px;
 	color: white;
@@ -234,4 +237,21 @@ tbody tr {
 
 .nblocation {
     margin-top: 4px;
+}
+
+.iframe-popup { 
+    display: none; 
+    border: 1px black solid;
+    width: 50%; height: 50%; 
+    top:25%; left:25%;
+    background-color: white;
+    z-index: 10;
+    padding: 2em;
+    position: fixed;
+}
+
+#iframe {
+    border: 0;
+    height: 100%;
+    width: 100%;
 }

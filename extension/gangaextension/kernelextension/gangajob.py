@@ -123,7 +123,7 @@ class GangaMonitor:
 
         while True:
             # Run infinite loop until endpoint is reached
-            if str(job_obj) == "submitted":
+            if str(job_obj) == "submitted" or str(job_obj) == "running":
                 self.ipython.run_code('reloadJob(%s)' % id)
             self.ipython.run_code('job_obj = jobs[%s]' % id)
             job_obj = self.ipython.user_ns['job_obj']

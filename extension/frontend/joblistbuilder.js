@@ -27,17 +27,32 @@ define([
          * Function to load HTML templates, animation and sorting events.
          */
         function build_ui() {
-
+            // API Endpoint for querying Job Info from server
             var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
+
+            // Skeleton HTML of Jobs Page
             var skeleton = $(joblistHTML);
             var element = $(skeleton);
+
+            // Insert Ganga Icon GIF to element. It will display while loading as overlay.
             element.find('#text img').attr('src', requirejs.toUrl('./static/gangaicon.gif'));
+
+            // Make Select Jobs button tri-state
             element.find('#select-jobs').indeterminate = true;
+
+            // obj is singleton object which query server and renders list.
             var obj = new getJobs(list_endpoint, element);
 
-
+            // Sort Jobs Rows on the basis of Job IDs (Ascending or Descending)
             element.find('#sort-ID').click(function () {
-                element.find('#sort-ID i').show().toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+                // Toggle between Up and Down arrow.
+                element.find('#sort-ID i').toggleClass('fa-arrow-up fa-arrow-down');
+
+                // This is tricky, there are two rows per Job (one for Job other for SubJobs)
+                // so for sorting, we have to reverse
+                // 5, 5', 4, 4', 3, 3', 2, 2', 1, 1'
+                // to
+                // 1, 1', 2, 2', 3, 3', 4, 4', 5, 5',  
                 var i = 0;
                 element.find('.jlist tbody tr').each(function () {
                     var row = $(this).detach();
@@ -50,46 +65,66 @@ define([
                     i++;
                 });
             });
-
+            
+            // Show 10 Jobs per page
             element.find('#jobs10').click(function () {
                 element.find('tbody').empty();
                 element.find('#pagination').empty();
-                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                element.find('#sort-ID i').removeClass('fa-arrow-up'); // Default mode is descending
                 obj.changeSize(10, list_endpoint);
                 obj.getData(obj.endpoint);
             });
 
+            // Show 20 Jobs per page
             element.find('#jobs20').click(function () {
                 element.find('tbody').empty();
                 element.find('#pagination').empty();
-                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                element.find('#sort-ID i').removeClass('fa-arrow-up'); // Default mode is descending
                 obj.changeSize(20, list_endpoint);
                 obj.getData(obj.endpoint);
             });
 
+            // Show 50 Jobs per page
             element.find('#jobs50').click(function () {
                 element.find('tbody').empty();
                 element.find('#pagination').empty();
-                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                element.find('#sort-ID i').removeClass('fa-arrow-up'); // Default mode is descending
                 obj.changeSize(50, list_endpoint);
                 obj.getData(obj.endpoint);
             });
 
+            // Show 100 Jobs per page
             element.find('#jobs100').click(function () {
                 element.find('tbody').empty();
                 element.find('#pagination').empty();
-                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                element.find('#sort-ID i').removeClass('fa-arrow-up'); // Default mode is descending
                 obj.changeSize(100, list_endpoint);
                 obj.getData(obj.endpoint);
             });
 
+            // Refresh the Job List on clicking of Refresh button.
             element.find('#refresh-job-button').click(function () {
                 element.find('tbody').empty();
                 element.find('#pagination').empty();
-                element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
+                element.find('#sort-ID i').removeClass('fa-arrow-up'); // Default mode is descending
                 obj.getData(obj.endpoint);
             });
-            setInterval( function() { obj.getData(obj.endpoint, false); }, 22000 );
+            
+             // Open Logs in Iframe
+            element.find('#logs').click(function (e) {
+                e.preventDefault();
+                element.find("iframe").attr("src", utils.url_path_join(utils.get_body_data('baseUrl'), 'view/ganga-monitoring.txt'));
+                element.find(".iframe-popup").show().fadeIn('slow');
+            });
+            element.find(".iframe-close").click(function () {
+                $(this).parent().fadeOut("slow");
+            });
+
+            // Refresh the Job List every 12 seconds to pick new updates from server.
+            setInterval( function() {
+                obj.getData(obj.endpoint, false);
+            }, 12000 );
+
             return element;
         }
 
@@ -101,7 +136,7 @@ define([
         function getJobs(list_endpoint, element) {
             this.element = element;
             this.page = 1;
-            this.size = 10; // Rows demanded per request (default to 10)
+            this.size = 20; // Rows demanded per request (default to 20)
             this.currentRows = this.size;
             this.page_count = 0;
             this.endpoint = list_endpoint + '?size=' + this.size;
@@ -116,69 +151,114 @@ define([
         getJobs.prototype.changeSize = function (size, list_endpoint) {
             this.size = size;
             this.endpoint = list_endpoint + '?size=' + this.size;
-            // console.log('csize');
         }
 
         /**
          * Function for making asynchronous AJAX request to Ganga Server Extension
          * @param {string} endpoint 
          */
-        getJobs.prototype.getData = function (endpoint, overlay=true) {
+        getJobs.prototype.getData = function (endpoint, force_refresh=true) {
             var that = this;
-            if (overlay) {
+            // Don't show overlay during periodic refresh
+            if (force_refresh) {
                 this.element.find('#overlay').css('display', 'block');
             }
+
+            // Store the selected checkbox to maintain the state after refreshing.
+            this.selected = [];
+
+            var checkboxes = this.element.find('input:checkbox[name="job_row"]');
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    var id = $(checkboxes[i]).parent().next().text();
+                    this.selected.push(id);
+                }
+            }
+
+            // AJAX Request to server extension
             $.ajax({
                 url: endpoint,
                 dataType: 'json',
                 success: function (result) {
                     that.element.find('tbody').empty();
                     that.element.find('#pagination').empty();
-                    that.element.find('#sort-ID i').removeClass('fa-arrow-down').removeClass('fa-arrow-up');
                     that.element.find('#overlay').css('display', 'none');
                     that.buildList(result);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     that.element.find('#overlay').css('display', 'none');
+                    console.log(jqXHR, textStatus, errorThrown);
                 },
                 timeout: 20000
             });
         }
+
         /**
          * Function for creting Job List using the result obtained from AJAX request.
          * @param {object} result 
          */
         getJobs.prototype.buildList = function (result) {
             var that = this;
+            // Delete existing pagination
             that.element.find('#pagination').empty();
-            that.page_count = Math.ceil(result.total_jobs / result.size);
-            that.start_index = result.start;
 
-            for (var i = 0; i < that.page_count; i++) {
-                var high_bound = result.total_jobs - 1 - i * (result.size);
-                var low_bound = high_bound - result.size + 1;
-                var pagination = $('<span title="' + Math.max(low_bound, 0) + '-' + high_bound + '"class="btn btn-xs btn-default" id="p' + (i + 1) +
-                    '" style="margin: 0 2px;">' + (i + 1) + '</span>')
+            // Total jobs available in Ganga
+            var total_jobs = parseInt(result.total_jobs);
+            // Current size of maximum permssible Jobs per page.
+            var size = parseInt(that.size);
+            // How many pages are required for sowing all Jobs ?
+            var page_count = Math.ceil(total_jobs / size);
+
+            // Create Pagination with tooltip and link.
+            for (var i = 0; i < page_count; i++) {
+                // The highest Job index for current page.
+                var high_bound = total_jobs - 1 - i * (size);
+
+                // The Lowest Job index for current page.
+                var low_bound = Math.max(high_bound - size + 1, 0);
+
+                // The Pagination element with tooltip.
+                var pagination = $('<span title="' + low_bound + '-' + high_bound + '"class="btn btn-xs btn-default" id="p' + (i + 1) +
+                    '" style="margin: 0 2px;">' + (i + 1) + '</span>');
+
                 that.element.find('#pagination').append(pagination);
+
+                // Disable current page's pagination button.
                 that.element.find('#p' + (that.page)).addClass('active disabled').css('pointer-events', 'none');
+                
+                // Click event for other page's pagination button.
                 pagination.click(function () {
+                    // Reset header element
                     that.resetElement();
-                    that.element.find('#toggle-sort').hide();
+                    // Remove current page from active mode.
                     that.element.find('#p' + (that.page)).removeClass('active');
+                    // Delete current pagination
                     that.element.find('#pagination').empty();
+                    // Delete current List
                     that.element.find('.jlist tbody').empty();
-                    var page_no = $(this).attr('id').split('p')[1]
-                    var endpoint_query = '?size=' + that.size + '&start=' + (result.start - (page_no - that.page) * that.size)
+                    // Find page number of clicked pagination button
+                    var page_no = parseInt($(this).attr('id').split('p')[1]);
+                    // Endpoint for fetching data of new page.
+                    // ID of latest Job = total_jobs - 1.
+                    // New page will have max ID = ID of latest Job - (page no - 1) * size
+                    var endpoint_query = '?size=' + that.size + '&end=' + (total_jobs - 1 - (page_no-1) * (size)); 
                     var new_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist' + endpoint_query);
-                    // console.log(new_endpoint);
+                    // Update Current Page
                     that.page = page_no;
+                    // Update Current Endpoint
                     that.endpoint = new_endpoint;
+                    // Fetch data with new endpoint
                     that.getData(new_endpoint);
                 });
             }
 
+            // Create the Table of Jobs.
             $.each(result.data, function (id, jobdata) {
                 var row = $(joblistRow);
+                // If checkbox of this row was selected before periodic refreshing than also check it now.
+                if (that.selected.includes(id)) {
+                    row.find('input:checkbox[name="job_row"]').prop('checked', true);
+                }
                 row.find('.thid').text(id);
                 row.find('.thname').text(jobdata.name);
                 row.find('.thbackend').text(jobdata.backend);
@@ -204,30 +284,25 @@ define([
 
                 row.find('#open-this-notebook').addClass('open' + id);
                 row.find('#remove-this-job').addClass('remove' + id);
-                row.find('#open-this-notebook').click(function () {
-                    // var onbutton = $('<a></a>');
-                    // onbutton.addClass("btn btn-xs btn-default nblocation");
-                    // onbutton.attr("target", "_blank");
-                    // onbutton.text("Open Notebook")               
 
-                    // row.find('.subjobinfo').append(onbutton);
-                    window.open(jobdata.nblocation, '_blank');
-                });
+                // Function for removing this Job from Ganga Repository.
                 row.find('#remove-this-job').click(function () {
                     var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
-                    var endpoint = list_endpoint + '?remove=yes&jobid=' + id;
-                    // console.log(endpoint)  
-                    row.hide();
+                    var endpoint = list_endpoint + '?remove=true&jobid=' + id;
                     $.getJSON(endpoint, function (result) {
-                        // console.log(result);
                         if (result.id == id && result.remove == 'true') {
-                            row.remove()
+                            dialog.modal({
+                                title: 'Job Removed',
+                                body: 'Job #' + id + ' removed succesfully.',
+                                buttons: {
+                                    Okay: {}
+                                }
+                            });
                         }
                         else {
-                            row.show();
                             dialog.modal({
-                                title: 'Failed',
-                                body: 'Removing Job ' + id + ' failed.',
+                                title: 'Job was not removed',
+                                body: result.error,
                                 buttons: {
                                     Okay: {}
                                 }
@@ -236,6 +311,7 @@ define([
                     });
                 });
 
+                // If subjobs are present create collapsible row for it.
                 if (jobdata.subjobs > 0) {
                     $.each(jobdata.subjob_status, function (subjob_id, subjobdata) {
                         var subjobrow = $('<div class="subjobrow">\
@@ -269,6 +345,7 @@ define([
                 that.element.find('.jlist tbody').prepend(row);
             });
 
+            // Show all jobs in table.
             this.element.find('#select-all-jobs').click(function () {
                 that.currentRows = that.size;
                 var i = 0;
@@ -285,6 +362,8 @@ define([
                 });
                 that.resetElement();
             });
+
+            // Show finished Jobs only.
             this.element.find('#select-finished-jobs').click(function () {
                 that.currentRows = that.size;
                 that.element.find('.jlist tbody tr').each(function () {
@@ -300,6 +379,8 @@ define([
                     }
                 });
             });
+
+            // Show running/unfinished Jobs only.
             this.element.find('#select-running-jobs').click(function () {
                 that.currentRows = that.size;
                 that.element.find('.jlist tbody tr').each(function () {
@@ -314,6 +395,8 @@ define([
                     }
                 });
             });
+
+            // Checkbox event handlers
             var that = this;
             var checkboxes = that.element.find('input:checkbox[name="job_row"]');
             var checkbox_count = checkboxes.length;
@@ -332,14 +415,12 @@ define([
                         that.element.find('#select-jobs').prop('indeterminate', true);
                         if (checked_boxes != 1) {
                             that.element.find('#job-cancel').hide();
-                            that.element.find('#open-notebook').hide();
                         }
                     }
                     else if (checked_boxes == that.currentRows) {
                         that.element.find('.job_toolbar_info').hide();
                         that.element.find('.dynamic_job_button button').show();
                         that.element.find('#job-cancel').hide();
-                        that.element.find('#open-notebook').hide();
                         that.element.find('#select-jobs').prop('indeterminate', false);
                         that.element.find('#select-jobs').prop('checked', true);
                     }
@@ -350,6 +431,7 @@ define([
                         that.element.find('#select-jobs').prop('checked', false);
                     }
                 });
+
             var select_all = this.element.find('#select-jobs');
             var that = this;
             select_all.change(
@@ -358,7 +440,6 @@ define([
                         that.element.find('.job_toolbar_info').hide();
                         that.element.find('.dynamic_job_button button').show();
                         that.element.find('#job-cancel').hide();
-                        that.element.find('#open-notebook').hide();
                         checkboxes.filter(':visible').prop('checked', true);
                         that.element.find('#counter-select-jobs').text(that.currentRows);
                     }
@@ -368,8 +449,9 @@ define([
                     }
                 }
             );
+
+            // Select all checkboxes
             this.element.find('#button-select-all').click(function (e) {
-                // console.log(e);
                 // toggle checkbox if the click doesn't come from the checkbox already
                 if (!$(e.target).is('input[type=checkbox]')) {
                     if (select_all.prop('checked') || select_all.data('indeterminate')) {
@@ -380,25 +462,53 @@ define([
                         that.element.find('.job_toolbar_info').hide();
                         that.element.find('.dynamic_job_button button').show();
                         that.element.find('#job-cancel').hide();
-                        that.element.find('#open-notebook').hide();
                         checkboxes.filter(':visible').prop('checked', true);
-                        that.element.find('#counter-select-jobs').text(that.currentRows);
+                        that.element.find('#counter-select-jobs').text('');
                         that.element.find('#select-jobs').prop('indeterminate', false);
                         that.element.find('#select-jobs').prop('checked', true);
                     }
                 }
             });
 
-            var that = this;
-            this.element.find('#open-notebook').click(function () {
+            // Function for killing Job.
+            this.element.find('#job-cancel').click(function () {
+                var list_endpoint = utils.url_path_join(utils.get_body_data('baseUrl'), 'gangajoblist');
+                that.element.find('#select-jobs').prop('indeterminate', false);
+                that.element.find('#select-jobs').prop('checked', false);
+                that.resetElement();
+                that.getData(that.endpoint);
+
                 for (var i = 0; i < checkbox_count; i++) {
                     if (checkboxes[i].checked) {
+                        $(checkboxes[i]).prop('checked', false);
                         var id = $(checkboxes[i]).parent().next().text();
-                        // console.log()
-                        that.element.find('.open' + id).click();
+                        var endpoint = list_endpoint + '?cancel=true&jobid=' + id;
+                        $.getJSON(endpoint, function (result) {
+                            if (result.id == id && result.cancel == 'true') {
+                                dialog.modal({
+                                    title: 'Job Killed succesfully',
+                                    body: 'Job #' + id + ' killed succesfully.',
+                                    buttons: {
+                                        Okay: {}
+                                    }
+                                });
+                            }
+                            else {
+                                dialog.modal({
+                                    title: 'Job was not killed',
+                                    body: result.error,
+                                    buttons: {
+                                        Okay: {}
+                                    }
+                                });
+                            }
+                        });
+                        break;
                     }
                 }
             });
+
+            // If multiple Jobs are asked to be removed simultaneously.
             this.element.find('#job-remove').unbind('click').click(function () {
                 var checked_count = 0;
                 for (var i = 0; i < checkbox_count; i++) {
@@ -406,7 +516,6 @@ define([
                         checked_count++;
                     }
                 }
-                // console.log('clicked');
                 dialog.modal({
                     title: 'Remove Jobs',
                     body: 'Are you sure you want to remove ' + checked_count + ' job(s)?',
@@ -428,11 +537,6 @@ define([
                         Cancel: {}
                     }
                 });
-                // for (var i = 0; i < checkbox_count; i++) {
-                //     if (checkboxes[i].checked) {
-                //         console.log(i);
-                //     }
-                // }
             });
         }
 

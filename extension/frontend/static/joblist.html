@@ -3,7 +3,8 @@
         <div class="col-sm-8 no-padding">
             <span id="list_info" class="job_toolbar_info">Select jobs to perform action on them.</span>
             <div class="dynamic_job_button">
-                <button id="open-notebook" title="Open Job Notebook" class="job-info-button btn btn-default btn-xs" style="display: none;">Open Notebook</button>                <!-- <button id="job-cancel" title="Cancel selected Job(s)" class="cancel-job-button btn btn-default btn-xs btn-warning" style="display: none;">Cancel</button> -->
+                <!-- <button id="open-notebook" title="Open Job Notebook" class="job-info-button btn btn-default btn-xs" style="display: none;">Open Notebook</button>                 -->
+                <button id="job-cancel" title="Cancel selected Job(s)" class="cancel-job-button btn btn-default btn-xs btn-warning" style="display: none;">Cancel</button>
                 <button id="job-remove" title="Remove selected" class="remove-job-button btn btn-default btn-xs btn-danger" style="display: none;">
                     <i class="fa fa-trash"></i> Remove Job
                 </button>
@@ -16,9 +17,12 @@
                 </span>
             </div>
             <div id="sort_ID" class="pull-right sort_button">
+                <span class="btn btn-xs btn-default" id="logs" title="Monitoring logs">
+                    Logs
+                </span>
                 <span class="btn btn-xs btn-default" id="sort-ID" title="Sort by Job ID">
                     Job ID
-                    <i class="fa fa-arrow-down" id="toggle-sort" style="display: none;"></i>
+                    <i class="fa fa-arrow-down" id="toggle-sort"></i>
                 </span>
                 <button class="dropdown-toggle btn btn-default btn-xs" data-toggle="dropdown">
                     <span>Jobs per page</span>
@@ -97,7 +101,15 @@
     <div id="pagination" class="page_buttons footer"></div>
     <div id="overlay">
         <div id="text">
-            <img alt="Ganga Loading"> Loading Job Data
+            <img alt=""> Loading Job Data
         </div>
+    </div>
+
+    <div class="iframe-popup">
+        <b>Monitoring Logs</b>
+        <a href="#" class="iframe-close">Close</a>
+            <iframe src="" id="iframe">
+                <p>Your browser does not support iframes.</p>
+            </iframe>
     </div>
 </div>

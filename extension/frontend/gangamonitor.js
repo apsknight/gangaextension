@@ -26,17 +26,20 @@ define([
         // Communication object with kernel.
         this.comm = null;
         this.cell = null;
+        // Object to store id : displaymonitor object as key : value 
         this.displaymonitor = {}
+        // Object to store cell_id : job_id as key : value 
         this.cell_id_hash = {}
+
+        // Start Comm communication with Kernel.
         this.startComm();
         var base_url = utils.get_body_data("baseUrl");
-        var path = utils.get_body_data("notebookPath");
-        this.location = utils.url_path_join(base_url, 'notebooks',
-                    utils.encode_uri_components(path));
+
         // Fix Kernel interruption/restarting
+        // If kernel is interrupted or restarted than again start communicaton
         events.on('kernel_connected.Kernel', $.proxy(this.startComm, this))
 
-        // Removing display when output area is cleared
+        // Removing display widget when output area is cleared.
         events.on('clear_output.CodeCell', function (event, data) {
             var monitor = that.getDisplayMonitor(data.cell.cell_id)
             if (monitor) {
@@ -44,11 +47,14 @@ define([
             }
         });
 
+        // Insert button in toolbar to toggle widgets and link for directly opening Jobs tab.
         this.createButtons();
     }
 
     GangaMonitor.prototype.createButtons = function () {
         var that = this;
+
+        // Toggle Display widgets
         var toggleHandler = function () {
             that.toggleAll();
         };
@@ -68,6 +74,7 @@ define([
             button.find('i').toggleClass('fa-toggle-on').toggleClass('fa-toggle-off');
         })
 
+        // Button for opening Jobs Page in new tab.
         var path = utils.url_path_join(utils.get_body_data('baseUrl'), 'swangangalist');
 
         var openJobsHandler = function () {
@@ -180,10 +187,10 @@ define([
             console.error('GangaMonitor: Job Started with no running cell');
             return;
         }
+        // Store in which cell this Job is created.
         this.cell_id_hash[cell.cell_id] = data.id
         var dismonitor = new displaymonitor.DisplayMonitor(this, cell, data);
         this.displaymonitor[data.id] = dismonitor;
-        // this.send({'msgtype': 'nblocation', 'id': data.id, 'nblocation': this.location});
     }
 
     /**
@@ -195,19 +202,26 @@ define([
         this.displaymonitor[data.id].updateContent(data);
     }
 
-    /**
-     * Ask for Job Info from Kernel
-     * @param {var} id - Job ID.
-     */
-    GangaMonitor.prototype.ask_job_info = function (jobid, cellid) {
-        this.send({'msgtype': 'askinfo', 'id': jobid, 'cell': cellid});
-    }
+    // /**
+    //  * Ask for Job Info from Kernel
+    //  * @param {var} id - Job ID.
+    //  */
+    // GangaMonitor.prototype.ask_job_info = function (jobid, cellid) {
+    //     this.send({'msgtype': 'askinfo', 'id': jobid, 'cell': cellid});
+    // }
 
+    /**
+     * Return the displaymonitor instance (if any) associated with cell.
+     * @param {object} cell_id - ID of cell
+     */
     GangaMonitor.prototype.getDisplayMonitor = function (cell_id) {
         var jobid = this.cell_id_hash[cell_id]
         return this.displaymonitor[jobid];
     }
 
+    /**
+     * Toggle display widget (Show/Hide).
+     */
     GangaMonitor.prototype.toggleAll = function () {
         var cells = Jupyter.notebook.get_cells();
 
