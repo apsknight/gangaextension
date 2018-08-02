@@ -28,7 +28,7 @@ class GangaMonitor:
         self.ipython.run_code("import ganga.ganga")
 
     def extract_job_obj(self, code): # Handle not found error
-        regex = r"(\w+)\s*=\s*ganga.Job\(\)"
+        regex = r"(\w+)\s*=\s*Job\("
         matches = re.finditer(regex, code, re.MULTILINE)
 
         for match in matches:
