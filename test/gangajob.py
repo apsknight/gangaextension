@@ -10,6 +10,7 @@ ganga_imported = False
 with capture_output() as ganga_import_output:
     try:
         import ganga.ganga
+        from ganga import *
         ganga_imported = True
     except ImportError as e:
         print("GangaMonitor: Unable to import Ganga in Python \n %s \n" % str(e))
