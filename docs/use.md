@@ -150,4 +150,3 @@ Since, the Ganga Namespace is directly imported in Notebook's Python namespace, 
 - [Ganga Docs](http://ganga.readthedocs.io/en/latest/) - Official Ganga Documentaion
 - [Ganga Tutorial](https://twiki.cern.ch/twiki/bin/view/LHCb/GangaTutorial1) - Ganga Tutorial on twiki.
 - [Ganga FAQ](https://twiki.cern.ch/twiki/bin/view/LHCb/FAQ/GangaLHCbFAQ) - Frequently asked questions related to Ganga.
-- [Ganga Talk](https://www.youtube.com/watch?v=SSdluuVNU3Y)
