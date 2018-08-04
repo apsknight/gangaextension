@@ -6,8 +6,6 @@ body {
 	background-color: #f7f7f7;
 	margin: 5px 0px;
 }
-
-/*--------------Title Bar--------------------*/
 .pm .title {
 	background-color: #fccd3f;
 	overflow: hidden;
@@ -48,7 +46,6 @@ body {
 	transition: transform 0.4s;
 	transform: rotate(90deg);
 }
-
 .gangaicon {
 	background-repeat: no-repeat;
 	background-position: center;
@@ -61,7 +58,6 @@ body {
 	transition: transform 0.4s;
 	transform: rotate(0deg);
 }
-
 .headericoncollapsed {
 	transform: rotate(0deg);
 }
@@ -80,7 +76,6 @@ body {
 .badgeinfo {
 	background-color: #17a2b8;
 }
-
 .badgeexecutor {
   font-size: 80%;
   padding: 5px 8px;
@@ -92,7 +87,6 @@ body {
   margin: 0px 2px;
   background-color: rgba(117, 57, 0, 0.65);
 }
-
 .badgecompleted, .badgefailed, .badgerunning, .badgeinfo {
 	font-size: 80%;
 	padding: 5px 8px;
@@ -101,10 +95,9 @@ body {
 	box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.36);
 	white-space: nowrap;
 	font-weight: bold;
-	/*   display: none; */
+	
 	margin: 0 2px;
 }
-
 .pm .tabbuttonicon {
 	display: inline-block;
 	position: relative;
@@ -138,7 +131,7 @@ body {
 .pm .tabbuttons {
 	margin: 0px 0px;
 	font-size: 0;
-	/* border: 0 1px solid #c25e00; */
+	
 }
 .pm .tabbutton:hover {
 	background-color: #ef9b2d;
@@ -147,18 +140,16 @@ body {
 	background-color: #ef9b2d;
 }
 .pm .tabbuttonactive {
-	/*color: white;*/
+	
 	box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.46) inset;
 	background-color: rgba(0, 0, 0, 0.2);
 	font-weight: bold;
 	border: 0;
 }
-/*--------------Content--------------------*/
-
 .pm .content {
-	/*padding: 5px;*/
-	/*resize: vertical;*/
-	/*overflow: hidden;*/
+	
+	
+	
 	float: clear;
 }
 .pm .tabcontent {
@@ -170,8 +161,6 @@ body {
 .pm .tabcontentactive {
 	display: initial;
 }
-
-/*-------------Tooltip Popup---------------*/
 .ui-tooltip {
 	background: #666;
 	color: white;
@@ -224,7 +213,7 @@ body {
 	background-position: center;
 	background-size: 100%;
 	width: 15px;
-	/* display: inline-block; */
+	
 	top: -2px;
 	height: 24px;
 	vertical-align: middle;
@@ -252,7 +241,7 @@ body {
 	border-radius: 0px;
 	width: 100%;
 	border: 1px solid #CFCFCF;
-	/* height: 10px; */
+	
 }
 .pm tbody {
 	height: 35px;
@@ -282,10 +271,6 @@ body {
 .pm th.thjobstatus {
 	width: 15%;
 }
-/* .pm th.thjobtages {
-  width: 10%;
-} */
-
 .pm th.thjobtasks {
 	width: 25%;
 }
@@ -298,15 +283,9 @@ body {
 .pm th.thstageid {
 	width: 15%;
 }
-/* .pm th.thstagename {
-	width: 10%;
-} */
 .pm th.thstagestatus {
 	width: 30%;
 }
-/* .pm th.thstagetasks {
-	width: 33%;
-} */
 .pm th.thstagestart {
 	width: 30%;
 }
@@ -319,15 +298,12 @@ progress {
 .pm .tdstatus {
 	padding: 2px;
 }
-
 .pm .SUBMITTING {
     background-color: #1a5863; 
 }
-
 .pm .SUBMITTED {
     background-color: #1b8efa; 
 }
-
 .pm .RUNNING {
 	background-color: #42A5F5;
 }
@@ -381,18 +357,6 @@ progress {
 	background: #42A5F5;
 	width: 0%;
 }
-/* .pm .cssprogress .val3 {
-	width: 0%;
-	background: #20B520;
-}
-.pm .cssprogress .val4 {
-	background: #DB3636;
-	width: 0%;
-}
-.pm .cssprogress .val5 {
-	background: #616161;
-	width: 0%;
-} */
 .pm .cssprogress span {
 	position: relative;
 	height: 100%;
@@ -403,7 +367,6 @@ progress {
 	padding: 0;
 	transition: width 1s;
 }
-
 .pm .tdstageicon {
   display: block;
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAXUlEQVR4AWMAgVGwjkGKNA3/GT4wZDAwkqABDA8zaBKtAQp/MjQwsBGnAQGvMVgTpwEB/zFMZ+AjoAEDPmUIpKGGfwzTGPho5OmfDPUMbKREnAYpSSOdgZGSxDcKADdXTK1stp++AAAAAElFTkSuQmCC);
@@ -411,14 +374,13 @@ progress {
   background-position: center;
   background-size: 100%;
   width: 15px;
-  /* display: inline-block; */
+  
   top: -2px;
   height: 24px;
   vertical-align: middle;
   transition: transform 0.4s;
   transform: rotate(0deg);
 }
-
 .pm .tdstageiconcollapsed {
   transform: rotate(90deg);
 }

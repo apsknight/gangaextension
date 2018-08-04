@@ -347,7 +347,7 @@ define([
 
             // Show all jobs in table.
             this.element.find('#select-all-jobs').click(function () {
-                that.currentRows = that.size;
+                that.currentRows = result.size;
                 var i = 0;
                 that.element.find('.jlist tbody tr').each(function () {
                     $(this).find('input:checkbox[name="job_row"]').attr('checked', false);
@@ -365,7 +365,7 @@ define([
 
             // Show finished Jobs only.
             this.element.find('#select-finished-jobs').click(function () {
-                that.currentRows = that.size;
+                that.currentRows = result.size;
                 that.element.find('.jlist tbody tr').each(function () {
                     $(this).show();
                     $(this).find('input:checkbox[name="job_row"]').attr('checked', false);
@@ -382,7 +382,7 @@ define([
 
             // Show running/unfinished Jobs only.
             this.element.find('#select-running-jobs').click(function () {
-                that.currentRows = that.size;
+                that.currentRows = result.size;
                 that.element.find('.jlist tbody tr').each(function () {
                     $(this).show();
                     $(this).find('input:checkbox[name="job_row"]').attr('checked', false);
@@ -441,7 +441,7 @@ define([
                         that.element.find('.dynamic_job_button button').show();
                         that.element.find('#job-cancel').hide();
                         checkboxes.filter(':visible').prop('checked', true);
-                        that.element.find('#counter-select-jobs').text(that.currentRows);
+                        that.element.find('#counter-select-jobs').text(result.size);
                     }
                     else {
                         checkboxes.filter(':visible').prop('checked', false);
@@ -463,7 +463,7 @@ define([
                         that.element.find('.dynamic_job_button button').show();
                         that.element.find('#job-cancel').hide();
                         checkboxes.filter(':visible').prop('checked', true);
-                        that.element.find('#counter-select-jobs').text('');
+                        that.element.find('#counter-select-jobs').text(result.size);
                         that.element.find('#select-jobs').prop('indeterminate', false);
                         that.element.find('#select-jobs').prop('checked', true);
                     }
