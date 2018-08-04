@@ -1,7 +1,7 @@
 /**
  * Entrpoint module for Jupyter Notebook frontend extension and Ganga Tab in Jupyter Tree view.
- * To enable this use "jupyter nbextension enable frontend/gangatreetab --section tree" and
- * "jupyter nbextension enable frontend/gangatreetab --section notebook"
+ * To enable this use "jupyter nbextension enable frontend/extension --section tree" and
+ * "jupyter nbextension enable frontend/extension --section notebook"
  * @module extension
  */
 
