@@ -44,4 +44,5 @@ install:
   - jupyter serverextension enable --py gangaextension --sys-prefix
 
 script:
+  - cd $TRAVIS_BUILD_DIR/
   - jupyter-nbconvert --to notebook --execute --ExecutePreprocessor.timeout=1000 notebooks/help_robinson.ipynb
