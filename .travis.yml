@@ -22,7 +22,6 @@ branches:
   # whitelist
   only:
     - master
-    - dev
 
 ## begin build steps
 ####################
@@ -35,12 +34,14 @@ before_install:
   - ipython profile create
   - cp -r test/ $(ipython locate)/extensions/
   - mv $(ipython locate)/extensions/test $(ipython locate)/extensions/extension
-  - ls $(ipython locate)/extensions/extension/
+  - echo "c.InteractiveShellApp.extensions.append('extension')" >> $(ipython profile locate default)/ipython_kernel_config.py
 
 install:
-  - echo "c.InteractiveShellApp.extensions.append('extension')" >> $(ipython profile locate default)/ipython_kernel_config.py
-  - jupyter nbextension install extension/frontend --user
-  - jupyter nbextension enable frontend/extension --user
+  - cd $TRAVIS_BUILD_DIR/extension/
+  - python -m pip install .
+  - jupyter nbextension install --py gangaextension --sys-prefix
+  - jupyter nbextension enable --py gangaextension --sys-prefix
+  - jupyter serverextension enable --py gangaextension --sys-prefix
 
 script:
   - jupyter-nbconvert --to notebook --execute --ExecutePreprocessor.timeout=1000 notebooks/help_robinson.ipynb
