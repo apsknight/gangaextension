@@ -21,10 +21,99 @@ data-server-root="{{server_root}}"
 {% block site %}
 
   <div id="ipython-main-app" class="container">
-        <!-- Tree -->
+    <!-- Tree -->
     <div class="tab-content">
       
     </div>
+    <!-- Running -->
+    <div id="running-modal" class="modal fade right" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h4 class="modal-title">Running Processes</h4>
+            </div>
+            <div class="modal-body">
+              <div id="running" class="">
+                <div class="panel-group" id="accordion" >
+                  <div>
+                    <div class="row title-bar">
+                      <div class="col-md-12">
+                        <h2>
+                          Notebooks
+                          <a data-toggle="collapse" data-target="#running_notebooks" href="javascript:">
+                            <i class="icon-collapse"></i>
+                          </a>
+                          <a data-toggle="collapse" class="extend_name" href="javascript:"
+                             title="Expand/Compress the file path">
+                            <i class="fa fa-expand"></i>
+                          </a>
+                        </h2>
+                      </div>
+                    </div>
+                    <div id="running_notebooks" class="notebook_list list_container collapse in">
+                      <div class="row header list_header">
+                        <div class="col-xs-9">
+                          <div class="row">
+                            <div class="col-xs-1">
+                            </div>
+                            <div class="col-xs-11 name">
+                              Name
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-xs-3">
+                          Kernel
+                        </div>
+                      </div>
+                      <div id="running_list">
+                        <div id="running_list_placeholder" class="row list_placeholder">
+                          <div class="list_item">There are no notebooks running</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="row title-bar">
+                      <div class="col-md-6">
+                        <h2>
+                          Terminals
+                          <a data-toggle="collapse" data-target="#running_terminals" href="javascript:">
+                            <i class="icon-collapse"></i>
+                          </a>
+                        </h2>
+                      </div>
+                    </div>
+                    <div id="running_terminals" class="notebook_list list_container collapse in">
+                      <div class="row header list_header">
+                        <div class="col-xs-9">
+                          <div class="row">
+                            <div class="col-xs-1">
+                            </div>
+                            <div class="col-xs-11 name">
+                              Name
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="terminal_list">
+                        <div id="terminal_list_header" class="row list_placeholder">
+                          {% if terminals_available %}
+                          <div class="list_item">There are no terminals running</div>
+                          {% else %}
+                          <div class="list_item">Terminals are unavailable</div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
   </div>
 
 
