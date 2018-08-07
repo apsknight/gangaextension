@@ -32,9 +32,6 @@
 
 ![submitting](https://camo.githubusercontent.com/25e2ec534a4f8e03424e8009cf6d429da809c158/68747470733a2f2f696d6167652e6962622e636f2f6a314238586f2f7375626d69745f6a6f622e676966)
 
-### Killing Jobs
-![killing](https://user-images.githubusercontent.com/19551774/42093416-de4dc32c-7bc9-11e8-8d90-570fec8bb7dc.gif)
-
 ### Resubmitting Failed Jobs
 ![resubmit](https://user-images.githubusercontent.com/19551774/42093468-09e32a40-7bca-11e8-850f-3b73d13ff2fb.gif)
 
