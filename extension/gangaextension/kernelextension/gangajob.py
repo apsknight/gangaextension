@@ -18,6 +18,8 @@ class GangaMonitor:
         self.cell = None
         # Import Ganga Module in Kernel namespace
         self.ipython.run_code("import ganga.ganga")
+        # Disable stomp library : Refer to https://github.com/apsknight/gangaextension/issues/8
+        self.ipython.run_code("ganga.config.Configuration.UsageMonitoringMSG = False")
         # Import default Ganga Namespace in Kernel Namespace
         self.ipython.run_code("from ganga import *")
         # Disable Monitoring as Jobs won't be monitored here.
