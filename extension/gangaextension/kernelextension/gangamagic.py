@@ -2,6 +2,7 @@ from __future__ import print_function
 
 # IPython Magic Modules
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
+from ipykernel import zmqshell
 # Module for submitting Ganga Jobs and commnicaing with frontend
 from gangajob import GangaMonitor
 
@@ -9,6 +10,10 @@ from gangajob import GangaMonitor
 class Ganga(Magics):
     """
     Class for registering '%%ganga' magic cell in kernel.
+    This is standard class required by IPython for registring a cell magic in kernel.
+    `load_ipython_extension` method also register a Comm in kernel using `gangajob` module for
+    communication with frontend.
+    Whenever a %%ganga magic cell is executed it's code goes to `run` method in `gangajob` module. 
     """
 
     def __init__(self, shell, **kwargs):
@@ -21,7 +26,8 @@ class Ganga(Magics):
         Called when Ganga Magic is executed
         """
 
-        # Inform frontend
+        # Inform frontend that a cell execution has been started so that 
+        # it can detect and store from which cell the execution has been started.
         monitor.send({"msgtype": "magic_execution_start"})
 
         code = ""
@@ -42,6 +48,9 @@ class Ganga(Magics):
 
 # Default ipython entrypoint for kernel extension.
 def load_ipython_extension(ipython):
+    if not isinstance(ipython, zmqshell.ZMQInteractiveShell):
+        # Ipython not running through notebook. So exiting.
+        return
     global monitor
     monitor = GangaMonitor(ipython)
     monitor.register_comm()
