@@ -319,7 +319,10 @@ progress {
 .pm .KILLED {
 	background-color: #616161;
 }
-.pm .SUBMITTING, .pm .SUBMITTED, .pm .COMPLETED, .pm .FAILED, .pm .RUNNING, .pm .NEW, .pm .KILLED {
+.pm .REMOVED {
+	background-color: #084b5c;
+}
+.pm .SUBMITTING, .pm .SUBMITTED, .pm .COMPLETED, .pm .FAILED, .pm .RUNNING, .pm .NEW, .pm .KILLED, .pm .REMOVED {
 	font-size: 85%;
 	padding: 4px 8px;
 	color: white;

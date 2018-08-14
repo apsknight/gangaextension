@@ -123,7 +123,10 @@ tbody tr {
 .KILLED {
 	background-color: #616161;
 }
-.SUBMITTING, .SUBMITTED, .COMPLETED, .FAILED, .RUNNING, .NEW, .KILLED {
+.REMOVED {
+	background-color: #084b5c;
+}
+.SUBMITTING, .SUBMITTED, .COMPLETED, .FAILED, .RUNNING, .NEW, .KILLED, .REMOVED {
 	font-size: 85%;
 	padding: 4px 8px;
 	color: white;
