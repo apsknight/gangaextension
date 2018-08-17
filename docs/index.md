@@ -35,6 +35,7 @@ Jupyter Notebook is an interactive computing environment that creates notebooks 
 
 ## Documentation
 - [How it works](how.md)
+- [How to use](use.md)
 - [Installation](installation.md)
 - Code Documenation (Available in source files)
 
