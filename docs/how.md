@@ -50,3 +50,8 @@ A front-end extension is a JavaScript file that defines an AMD module which expo
 
 ## Server Extension
 Jupyter Notebook server extensions is a Python module that loads when the Notebook web server application starts. It creates a Ganga Session which picks and monitors the Job submitted in other Ganga Sessions running in Notebook's kernel. This extension also creates an API which sends live status of all Ganga Jobs. For SWAN another handler is created in server extension which renders the Ganga Jobs tab in SWAN.
+
+### Following diagram illustrate how all the componenets of extension interact each other.
+![extension_diagram 1](https://user-images.githubusercontent.com/19551774/44107436-0032af2e-a015-11e8-99a1-c0f50d0cd8da.png)
+
+draw.io link for this diagram: https://goo.gl/W4XUxa
