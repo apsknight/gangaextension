@@ -7,7 +7,7 @@
 # Google Summer of Code 2018
 
 # [Large-scale computing backend for Jupyter notebooks](https://summerofcode.withgoogle.com/projects/#6368971138269184)
-> This project is co-mentored by [CERN-HSF](http://hepsoftwarefoundation.org) and [Imerial College, London](https://imperial.ac.uk) for [Google Summer of Code 2018](https://summerofcode.withgoogle.com/).
+> This project is co-mentored by [CERN-HSF](http://hepsoftwarefoundation.org) and [Imperial College, London](https://imperial.ac.uk) for [Google Summer of Code 2018](https://summerofcode.withgoogle.com/).
 
 ## Index
 - [Mentors](#mentors)
